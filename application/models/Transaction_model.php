@@ -141,9 +141,15 @@ class Transaction_model extends CI_Model
      */
     public function create($data)
     {
+        // Handle empty category_id - must be NULL, not empty string
+        $category_id = null;
+        if (isset($data['category_id']) && !empty($data['category_id'])) {
+            $category_id = $data['category_id'];
+        }
+
         $insert_data = array(
             'user_id' => $data['user_id'],
-            'category_id' => isset($data['category_id']) ? $data['category_id'] : null,
+            'category_id' => $category_id,
             'type' => $data['type'],
             'amount' => $data['amount'],
             'description' => isset($data['description']) ? $data['description'] : null,

@@ -55,19 +55,29 @@
                     <label class="block text-sm font-medium text-slate-700 mb-2">Kategori</label>
                     <select name="category_id"
                         class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none">
-                        <option value="">Pilih kategori...</option>
-                        <optgroup label="Pengeluaran">
-                            <option value="">🍔 Makanan & Minuman</option>
-                            <option value="">🚗 Transportasi</option>
-                            <option value="">🛍️ Belanja</option>
-                            <option value="">📄 Tagihan</option>
-                            <option value="">🎮 Hiburan</option>
-                        </optgroup>
-                        <optgroup label="Pemasukan">
-                            <option value="">💰 Gaji</option>
-                            <option value="">🎁 Bonus</option>
-                            <option value="">📈 Investasi</option>
-                        </optgroup>
+                        <option value="">Pilih kategori (opsional)...</option>
+                        <?php if (isset($categories) && !empty($categories)): ?>
+                            <?php
+                            $expense_cats = array_filter($categories, function ($c) {
+                                return $c->type == 'expense'; });
+                            $income_cats = array_filter($categories, function ($c) {
+                                return $c->type == 'income'; });
+                            ?>
+                            <?php if (!empty($expense_cats)): ?>
+                                <optgroup label="Pengeluaran">
+                                    <?php foreach ($expense_cats as $cat): ?>
+                                        <option value="<?= $cat->id ?>"><?= $cat->icon ?>             <?= $cat->name ?></option>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endif; ?>
+                            <?php if (!empty($income_cats)): ?>
+                                <optgroup label="Pemasukan">
+                                    <?php foreach ($income_cats as $cat): ?>
+                                        <option value="<?= $cat->id ?>"><?= $cat->icon ?>             <?= $cat->name ?></option>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </select>
                 </div>
 

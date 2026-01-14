@@ -25,6 +25,7 @@ class Dashboard extends Auth_Controller
         $this->data['recent_transactions'] = $this->Transaction_model->get_recent($user['id'], 5);
         $this->data['top_expenses'] = $this->Transaction_model->get_top_categories($user['id'], 'expense', 5);
         $this->data['monthly_data'] = $this->Transaction_model->get_monthly_summary($user['id'], 6);
+        $this->data['categories'] = $this->Category_model->get_all($user['id']);
 
         $this->data['title'] = 'Dashboard - incatat.id';
         $this->data['page'] = 'dashboard';
