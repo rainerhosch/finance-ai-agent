@@ -70,7 +70,9 @@
     <!-- Chart Section -->
     <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
         <h3 class="text-lg font-semibold mb-6">Ringkasan 6 Bulan Terakhir</h3>
-        <canvas id="summaryChart" height="120"></canvas>
+        <div class="relative" style="height: 300px;">
+            <canvas id="summaryChart"></canvas>
+        </div>
     </div>
 
     <!-- Top Expenses -->
@@ -150,7 +152,7 @@
 <script>
     // Chart initialization
     const ctx = document.getElementById('summaryChart').getContext('2d');
-    
+
     <?php
     // Prepare chart data
     $months = [];
@@ -183,47 +185,47 @@
     }
     ?>
 
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: <?= json_encode($months) ?>,
-                datasets: [
-                    {
-                        label: 'Pemasukan',
-                        data: <?= json_encode($income_data) ?>,
-                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
-                        borderRadius: 8,
-                        barPercentage: 0.6,
-                    },
-                    {
-                        label: 'Pengeluaran',
-                        data: <?= json_encode($expense_data) ?>,
-                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                        borderRadius: 8,
-                        barPercentage: 0.6,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                    }
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: <?= json_encode($months) ?>,
+            datasets: [
+                {
+                    label: 'Pemasukan',
+                    data: <?= json_encode($income_data) ?>,
+                    backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                    borderRadius: 8,
+                    barPercentage: 0.6,
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function (value) {
-                                return 'Rp ' + value.toLocaleString('id-ID');
-                            }
+                {
+                    label: 'Pengeluaran',
+                    data: <?= json_encode($expense_data) ?>,
+                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                    borderRadius: 8,
+                    barPercentage: 0.6,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
                         }
                     }
                 }
             }
-        });
+        }
+    });
 </script>
 
 <?php $this->load->view('layout/dashboard_footer'); ?>
