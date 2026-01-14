@@ -7,7 +7,7 @@ application/logs/*
 !application/logs/index.html
 
 !application/*/.htaccess
-
+database_setup.sql
 composer.lock
 tests/mocks/database/ci_test.sqlite
 
