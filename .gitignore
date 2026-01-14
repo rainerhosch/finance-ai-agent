@@ -1,5 +1,5 @@
 .DS_Store
-
+dbfile
 application/cache/*
 !application/cache/index.html
 
