@@ -75,10 +75,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn' => '',
-	'hostname' => getenv('DB_HOST') ?: 'localhost',
-	'username' => getenv('DB_USER') ?: 'root',
-	'password' => getenv('DB_PASS') ?: '',
-	'database' => getenv('DB_NAME') ?: 'finance_ai_agent',
+	'hostname' => env('DB_HOST', 'localhost'),
+	'username' => env('DB_USER', 'root'),
+	'password' => env('DB_PASS', ''),
+	'database' => env('DB_NAME', 'finance_ai_agent'),
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
