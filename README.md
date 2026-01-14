@@ -1,4 +1,4 @@
-# FinanceAI - Financial Agentic AI
+# incatat.id - Pencatatan Keuangan Cerdas
 
 Website pencatatan keuangan cerdas berbasis AI dengan integrasi Telegram Bot.
 

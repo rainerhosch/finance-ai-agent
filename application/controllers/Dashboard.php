@@ -26,7 +26,7 @@ class Dashboard extends Auth_Controller
         $this->data['top_expenses'] = $this->Transaction_model->get_top_categories($user['id'], 'expense', 5);
         $this->data['monthly_data'] = $this->Transaction_model->get_monthly_summary($user['id'], 6);
 
-        $this->data['title'] = 'Dashboard - FinanceAI';
+        $this->data['title'] = 'Dashboard - incatat.id';
         $this->data['page'] = 'dashboard';
 
         $this->load->view('dashboard/index', $this->data);
@@ -39,7 +39,7 @@ class Dashboard extends Auth_Controller
     {
         $user = $this->get_user();
         $this->data['user_detail'] = $this->User_model->find($user['id']);
-        $this->data['title'] = 'Profil - FinanceAI';
+        $this->data['title'] = 'Profil - incatat.id';
         $this->data['page'] = 'profile';
 
         $this->load->view('dashboard/profile', $this->data);
@@ -103,7 +103,7 @@ class Dashboard extends Auth_Controller
         $this->data['transactions'] = $this->Transaction_model->get_by_user($user['id'], $filters);
         $this->data['categories'] = $this->Category_model->get_all($user['id']);
         $this->data['filters'] = $filters;
-        $this->data['title'] = 'Transaksi - FinanceAI';
+        $this->data['title'] = 'Transaksi - incatat.id';
         $this->data['page'] = 'transactions';
 
         $this->load->view('dashboard/transactions', $this->data);
@@ -158,7 +158,7 @@ class Dashboard extends Auth_Controller
     {
         $user = $this->get_user();
         $this->data['user_detail'] = $this->User_model->find($user['id']);
-        $this->data['title'] = 'Pengaturan - FinanceAI';
+        $this->data['title'] = 'Pengaturan - incatat.id';
         $this->data['page'] = 'settings';
 
         $this->load->view('dashboard/settings', $this->data);

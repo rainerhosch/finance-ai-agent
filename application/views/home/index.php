@@ -9,7 +9,7 @@
                 <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg">
                     <span class="text-white text-xl">💰</span>
                 </div>
-                <span class="text-2xl font-bold gradient-text">FinanceAI</span>
+                <span class="text-2xl font-bold gradient-text">incatat.id</span>
             </div>
 
             <!-- Desktop Menu -->
@@ -149,7 +149,7 @@
                                 <span class="text-white">🤖</span>
                             </div>
                             <div>
-                                <div class="font-semibold">FinanceAI Bot</div>
+                                <div class="font-semibold">incatat Bot</div>
                                 <div class="text-xs text-green-500">● Online</div>
                             </div>
                         </div>

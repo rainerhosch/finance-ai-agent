@@ -65,7 +65,7 @@
                         <span class="text-2xl">1️⃣</span>
                         <div>
                             <div class="font-medium text-blue-800">Buka Telegram Bot</div>
-                            <div class="text-sm text-blue-600">Cari dan buka @FinanceAI_Bot di Telegram</div>
+                            <div class="text-sm text-blue-600">Cari dan buka @incatat_bot di Telegram</div>
                         </div>
                     </div>
 

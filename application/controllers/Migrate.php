@@ -25,7 +25,7 @@ class Migrate extends CI_Controller
     {
         $this->load->dbforge();
 
-        echo "<h1>FinanceAI Database Migration</h1>";
+        echo "<h1>incatat.id Database Migration</h1>";
         echo "<pre>";
 
         try {

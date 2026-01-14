@@ -8,7 +8,7 @@
                     <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
                         <span class="text-white text-xl">💰</span>
                     </div>
-                    <span class="text-2xl font-bold">FinanceAI</span>
+                    <span class="text-2xl font-bold">incatat.id</span>
                 </div>
                 <p class="text-slate-400 max-w-md">
                     Kelola keuangan Anda dengan mudah menggunakan AI dan Telegram Bot.
@@ -30,8 +30,8 @@
             <div>
                 <h4 class="font-semibold mb-4">Hubungi Kami</h4>
                 <ul class="space-y-2 text-slate-400">
-                    <li>📧 support@financeai.id</li>
-                    <li>💬 @FinanceAI_Bot</li>
+                    <li>📧 support@incatat.id</li>
+                    <li>💬 @incatat_bot</li>
                 </ul>
             </div>
         </div>
@@ -39,7 +39,7 @@
         <div class="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p class="text-slate-400 text-sm">
                 ©
-                <?= date('Y') ?> FinanceAI. All rights reserved.
+                <?= date('Y') ?> incatat.id. All rights reserved.
             </p>
             <div class="flex space-x-6 mt-4 md:mt-0">
                 <a href="#" class="text-slate-400 hover:text-white transition">Privacy Policy</a>

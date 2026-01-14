@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="<?= isset($meta_description) ? $meta_description : 'FinanceAI - Pencatatan Keuangan Cerdas' ?>">
+        content="<?= isset($meta_description) ? $meta_description : 'incatat.id - Pencatatan Keuangan Cerdas' ?>">
     <title>
-        <?= isset($title) ? $title : 'FinanceAI' ?>
+        <?= isset($title) ? $title : 'incatat.id' ?>
     </title>
 
     <!-- Tailwind CSS via CDN -->

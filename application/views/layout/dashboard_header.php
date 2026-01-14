@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        <?= isset($title) ? $title : 'Dashboard - FinanceAI' ?>
+        <?= isset($title) ? $title : 'Dashboard - incatat.id' ?>
     </title>
 
     <!-- Tailwind CSS via CDN -->
@@ -72,7 +72,7 @@
                         <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg">
                             <span class="text-white text-xl">💰</span>
                         </div>
-                        <span class="text-xl font-bold text-slate-800">FinanceAI</span>
+                        <span class="text-xl font-bold text-slate-800">incatat.id</span>
                     </a>
                 </div>
 
@@ -170,7 +170,7 @@
                             </svg>
                         </button>
                         <h1 class="text-xl font-semibold text-slate-800">
-                            <?= isset($title) ? str_replace(' - FinanceAI', '', $title) : 'Dashboard' ?>
+                            <?= isset($title) ? str_replace(' - incatat.id', '', $title) : 'Dashboard' ?>
                         </h1>
                     </div>
 
