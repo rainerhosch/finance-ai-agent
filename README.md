@@ -32,41 +32,49 @@ cd finance-ai-agent
 composer install
 ```
 
-### 2. Konfigurasi Database
+### 2. Konfigurasi Environment
+
+1. Copy file `.env.example` menjadi `.env`:
+```bash
+cp .env.example .env
+```
+
+2. Edit file `.env` dengan konfigurasi Anda:
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=your_password
+DB_NAME=finance_ai_agent
+
+# Google OAuth 2.0
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Application Environment
+CI_ENV=development
+```
+
+### 3. Konfigurasi Database
 
 1. Buat database MySQL baru:
 ```sql
 CREATE DATABASE finance_ai_agent CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-2. Update konfigurasi di `application/config/database.php` atau set environment variables:
-```bash
-export DB_HOST=localhost
-export DB_USER=root
-export DB_PASS=your_password
-export DB_NAME=finance_ai_agent
-```
-
-3. Jalankan migrasi database:
+2. Jalankan migrasi database:
    - **Via Browser**: Akses `http://localhost/finance-ai-agent/migrate`
    - **Via SQL**: Import file `database_setup.sql`
 
-### 3. Konfigurasi Google OAuth
+### 4. Konfigurasi Google OAuth
 
 1. Buat project di [Google Cloud Console](https://console.cloud.google.com/)
 2. Enable Google+ API
 3. Buat OAuth 2.0 credentials
-4. Set Authorized redirect URI: `http://yourdomain.com/auth/callback`
-5. Update konfigurasi:
+4. Set Authorized redirect URI: `http://localhost/finance-ai-agent/auth/callback`
+5. Copy Client ID dan Client Secret ke file `.env`
 
-```bash
-export GOOGLE_CLIENT_ID=your_client_id
-export GOOGLE_CLIENT_SECRET=your_client_secret
-```
-
-Atau edit langsung di `application/config/auth.php`
-
-### 4. Jalankan Server
+### 5. Jalankan Server
 
 ```bash
 # Menggunakan PHP built-in server

@@ -2,7 +2,7 @@
 dbfile
 application/cache/*
 !application/cache/index.html
-
+.env
 application/logs/*
 !application/logs/index.html
 
