@@ -21,6 +21,6 @@ class Home extends MY_Controller
         $this->data['title'] = 'FinanceAI - Pencatatan Keuangan Cerdas';
         $this->data['meta_description'] = 'Kelola keuangan Anda dengan mudah menggunakan AI dan Telegram Bot. Catat pemasukan dan pengeluaran hanya dengan chat atau upload foto struk.';
 
-        $this->load->view('home/index', $this->data);
+        $this->render('home/index');
     }
 }

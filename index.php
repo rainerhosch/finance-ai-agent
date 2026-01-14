@@ -47,8 +47,9 @@ $dotenv_path = __DIR__ . '/.env';
 if (file_exists($dotenv_path)) {
 	$lines = file($dotenv_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	foreach ($lines as $line) {
-		// Skip comments
-		if (strpos(trim($line), '#') === 0) {
+		$line = trim($line);
+		// Skip comments and empty lines
+		if (empty($line) || strpos($line, '#') === 0) {
 			continue;
 		}
 		// Parse key=value
@@ -60,12 +61,10 @@ if (file_exists($dotenv_path)) {
 			if (preg_match('/^["\'](.*)["\']\s*$/', $value, $matches)) {
 				$value = $matches[1];
 			}
-			// Only set if not already defined
-			if (!getenv($key)) {
-				putenv("$key=$value");
-				$_ENV[$key] = $value;
-				$_SERVER[$key] = $value;
-			}
+			// Always set from .env file (override any existing)
+			putenv("$key=$value");
+			$_ENV[$key] = $value;
+			$_SERVER[$key] = $value;
 		}
 	}
 }
