@@ -60,8 +60,8 @@
     </style>
 </head>
 
-<body class="bg-slate-100 antialiased">
-    <div class="flex min-h-screen">
+<body class="bg-slate-100 antialiased overflow-x-hidden">
+    <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside id="sidebar"
             class="fixed inset-y-0 left-0 w-64 bg-white shadow-xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50">
@@ -158,7 +158,7 @@
         </div>
 
         <!-- Main Content -->
-        <main class="flex-1 lg:ml-64">
+        <main class="flex-1 lg:ml-64 overflow-y-auto h-screen">
             <!-- Top Bar -->
             <header class="sticky top-0 bg-white/95 backdrop-blur shadow-sm z-30">
                 <div class="flex items-center justify-between px-4 lg:px-8 py-4">
