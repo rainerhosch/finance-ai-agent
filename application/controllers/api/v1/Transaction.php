@@ -82,6 +82,7 @@ class Transaction extends API_Controller
             'user_id' => $this->user->id,
             'type' => $input['type'],
             'amount' => $input['amount'],
+            'qty' => isset($input['qty']) ? $input['qty'] : 1,
             'description' => isset($input['description']) ? $input['description'] : null,
             'category_id' => $category_id,
             'transaction_date' => isset($input['date']) ? $input['date'] : date('Y-m-d'),
