@@ -95,4 +95,16 @@ class Category_model extends CI_Model
     {
         return $this->get_all($user_id, 'expense');
     }
+
+    /**
+     * Find category by name (case-insensitive)
+     */
+    public function find_by_name($name, $user_id = null)
+    {
+        $this->db->where('LOWER(name)', strtolower($name));
+        if ($user_id) {
+            $this->db->where('(user_id IS NULL OR user_id = ' . (int) $user_id . ')');
+        }
+        return $this->db->get($this->table)->row();
+    }
 }

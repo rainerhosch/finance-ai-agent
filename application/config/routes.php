@@ -65,10 +65,25 @@ $route['dashboard/profile/update'] = 'dashboard/update_profile';
 $route['dashboard/transactions'] = 'dashboard/transactions';
 $route['dashboard/settings'] = 'dashboard/settings';
 
-// API routes
-$route['api/v1/verify-user'] = 'api/v1/verify_user';
-$route['api/v1/link-telegram'] = 'api/v1/link_telegram';
-$route['api/v1/transactions'] = 'api/v1/transactions';
-$route['api/v1/transactions/create'] = 'api/v1/create_transaction';
-$route['api/v1/summary'] = 'api/v1/summary';
+// API v1 routes - User
+$route['api/v1/user/verify'] = 'api/v1/user/verify';
+$route['api/v1/user/link-telegram'] = 'api/v1/user/link_telegram';
+$route['api/v1/user/profile'] = 'api/v1/user/profile';
 
+// API v1 routes - Transaction
+$route['api/v1/transaction'] = 'api/v1/transaction/index';
+$route['api/v1/transaction/create'] = 'api/v1/transaction/create';
+$route['api/v1/transaction/summary'] = 'api/v1/transaction/summary';
+$route['api/v1/transaction/delete/(:num)'] = 'api/v1/transaction/delete/$1';
+
+// API v1 routes - Masterdata
+$route['api/v1/masterdata/categories'] = 'api/v1/masterdata/categories';
+$route['api/v1/masterdata/categories/create'] = 'api/v1/masterdata/create_category';
+
+// Legacy API routes (backward compatible)
+$route['api/v1/verify-user'] = 'api/v1/user/verify';
+$route['api/v1/link-telegram'] = 'api/v1/user/link_telegram';
+$route['api/v1/transactions'] = 'api/v1/transaction/index';
+$route['api/v1/transactions/create'] = 'api/v1/transaction/create';
+$route['api/v1/summary'] = 'api/v1/transaction/summary';
+$route['api/v1/categories'] = 'api/v1/masterdata/categories';

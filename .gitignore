@@ -1,13 +1,15 @@
 .DS_Store
-dbfile
 application/cache/*
 !application/cache/index.html
-.env
 application/logs/*
 !application/logs/index.html
 
-!application/*/.htaccess
+.env
 database_setup.sql
+dbfile
+n8n-workflow
+
+!application/*/.htaccess
 composer.lock
 tests/mocks/database/ci_test.sqlite
 
