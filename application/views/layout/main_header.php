@@ -9,7 +9,7 @@
     <title>
         <?= isset($title) ? $title : 'incatat.id' ?>
     </title>
-
+    <link rel="shortcut icon" href="<?= base_url() ?>assets/img/favicon/logo.png" type="text/css">
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
