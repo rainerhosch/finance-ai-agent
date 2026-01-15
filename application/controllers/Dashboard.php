@@ -159,6 +159,14 @@ class Dashboard extends Auth_Controller
     {
         $user = $this->get_user();
         $this->data['user_detail'] = $this->User_model->find($user['id']);
+
+        // Get business info if user has one
+        $this->load->model('Business_model');
+        $this->data['business'] = null;
+        if ($this->data['user_detail']->business_id) {
+            $this->data['business'] = $this->Business_model->find($this->data['user_detail']->business_id);
+        }
+
         $this->data['title'] = 'Pengaturan - incatat.id';
         $this->data['page'] = 'settings';
 
@@ -176,4 +184,40 @@ class Dashboard extends Auth_Controller
         $this->session->set_flashdata('success', 'API Token berhasil diperbarui!');
         redirect('dashboard/settings');
     }
+
+    /**
+     * Update business info (owner only)
+     */
+    public function update_business()
+    {
+        $user = $this->get_user();
+        $user_detail = $this->User_model->find($user['id']);
+
+        // Check if user is owner
+        if ($user_detail->role !== 'owner') {
+            $this->session->set_flashdata('error', 'Hanya owner yang dapat mengubah info bisnis');
+            redirect('dashboard/settings');
+            return;
+        }
+
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('business_name', 'Nama Bisnis', 'required|min_length[2]|max_length[255]');
+
+        if ($this->form_validation->run() === FALSE) {
+            $this->session->set_flashdata('error', validation_errors());
+            redirect('dashboard/settings');
+            return;
+        }
+
+        $this->load->model('Business_model');
+        $this->Business_model->update($user_detail->business_id, array(
+            'name' => $this->input->post('business_name'),
+            'phone' => $this->input->post('business_phone'),
+            'address' => $this->input->post('business_address')
+        ));
+
+        $this->session->set_flashdata('success', 'Info bisnis berhasil diperbarui!');
+        redirect('dashboard/settings');
+    }
 }
+

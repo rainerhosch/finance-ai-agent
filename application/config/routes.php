@@ -64,6 +64,7 @@ $route['dashboard/profile'] = 'dashboard/profile';
 $route['dashboard/profile/update'] = 'dashboard/update_profile';
 $route['dashboard/transactions'] = 'dashboard/transactions';
 $route['dashboard/settings'] = 'dashboard/settings';
+$route['dashboard/settings/update-business'] = 'dashboard/update_business';
 
 // API v1 routes - User
 $route['api/v1/user/verify'] = 'api/v1/user/verify';

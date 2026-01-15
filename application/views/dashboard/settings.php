@@ -1,6 +1,44 @@
 <?php $this->load->view('layout/dashboard_header'); ?>
 
 <div class="max-w-2xl mx-auto space-y-6">
+    <?php if (isset($business) && $business && $user_detail->role === 'owner'): ?>
+        <!-- Business Settings Section (Owner Only) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b">
+                <h3 class="text-lg font-semibold text-slate-800">Info Bisnis</h3>
+                <p class="text-slate-500 text-sm mt-1">Kelola informasi bisnis/toko Anda</p>
+            </div>
+
+            <form action="<?= site_url('dashboard/update_business') ?>" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Nama Bisnis</label>
+                    <input type="text" name="business_name" value="<?= htmlspecialchars($business->name) ?>" required
+                        class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                        placeholder="Nama toko/usaha Anda">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Telepon Bisnis</label>
+                    <input type="text" name="business_phone" value="<?= htmlspecialchars($business->phone ?? '') ?>"
+                        class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                        placeholder="Nomor telepon bisnis">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Alamat</label>
+                    <textarea name="business_address" rows="2"
+                        class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                        placeholder="Alamat bisnis"><?= htmlspecialchars($business->address ?? '') ?></textarea>
+                </div>
+
+                <button type="submit"
+                    class="px-6 py-2.5 gradient-bg text-white rounded-xl font-medium hover:opacity-90 transition">
+                    Simpan Perubahan
+                </button>
+            </form>
+        </div>
+    <?php endif; ?>
+
     <!-- API Token Section -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="p-6 border-b">
