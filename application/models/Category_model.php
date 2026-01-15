@@ -5,6 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Category Model
  * 
  * Handles transaction categories (income/expense types).
+ * Categories belong to a business or are global defaults.
  */
 class Category_model extends CI_Model
 {
@@ -16,11 +17,15 @@ class Category_model extends CI_Model
     }
 
     /**
-     * Get all categories (default + user custom)
+     * Get all categories (default + business custom)
      */
-    public function get_all($user_id = null, $type = null)
+    public function get_all($business_id = null, $type = null)
     {
-        $this->db->where('(user_id IS NULL OR user_id = ' . (int) $user_id . ')');
+        if ($business_id) {
+            $this->db->where('(business_id IS NULL OR business_id = ' . (int) $business_id . ')');
+        } else {
+            $this->db->where('business_id IS NULL');
+        }
 
         if ($type) {
             $this->db->where('type', $type);
@@ -33,11 +38,18 @@ class Category_model extends CI_Model
     }
 
     /**
-     * Get categories for a specific user
+     * Get categories for a user (via their business)
      */
     public function get_by_user($user_id, $type = null)
     {
-        return $this->get_all($user_id, $type);
+        $this->load->model('User_model');
+        $user = $this->User_model->find($user_id);
+
+        if ($user && $user->business_id) {
+            return $this->get_all($user->business_id, $type);
+        }
+
+        return $this->get_all(null, $type);
     }
 
     /**
@@ -49,12 +61,24 @@ class Category_model extends CI_Model
     }
 
     /**
+     * Find category by name (case-insensitive)
+     */
+    public function find_by_name($name, $business_id = null)
+    {
+        $this->db->where('LOWER(name)', strtolower($name));
+        if ($business_id) {
+            $this->db->where('(business_id IS NULL OR business_id = ' . (int) $business_id . ')');
+        }
+        return $this->db->get($this->table)->row();
+    }
+
+    /**
      * Create a new category
      */
     public function create($data)
     {
         $insert_data = array(
-            'user_id' => isset($data['user_id']) ? $data['user_id'] : null,
+            'business_id' => isset($data['business_id']) ? $data['business_id'] : null,
             'name' => $data['name'],
             'type' => $data['type'],
             'icon' => isset($data['icon']) ? $data['icon'] : '📌',
@@ -83,28 +107,16 @@ class Category_model extends CI_Model
     /**
      * Get income categories
      */
-    public function get_income_categories($user_id = null)
+    public function get_income_categories($business_id = null)
     {
-        return $this->get_all($user_id, 'income');
+        return $this->get_all($business_id, 'income');
     }
 
     /**
      * Get expense categories
      */
-    public function get_expense_categories($user_id = null)
+    public function get_expense_categories($business_id = null)
     {
-        return $this->get_all($user_id, 'expense');
-    }
-
-    /**
-     * Find category by name (case-insensitive)
-     */
-    public function find_by_name($name, $user_id = null)
-    {
-        $this->db->where('LOWER(name)', strtolower($name));
-        if ($user_id) {
-            $this->db->where('(user_id IS NULL OR user_id = ' . (int) $user_id . ')');
-        }
-        return $this->db->get($this->table)->row();
+        return $this->get_all($business_id, 'expense');
     }
 }

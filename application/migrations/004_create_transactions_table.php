@@ -2,7 +2,9 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Migration: Create Transactions Table
+ * Migration: Create Transactions Table (Header)
+ * 
+ * Transaction header - one transaction can have multiple items.
  */
 class Migration_Create_transactions_table extends CI_Migration
 {
@@ -15,50 +17,52 @@ class Migration_Create_transactions_table extends CI_Migration
                 'unsigned' => TRUE,
                 'auto_increment' => TRUE
             ),
+            'business_id' => array(
+                'type' => 'INT',
+                'constraint' => 11,
+                'unsigned' => TRUE,
+                'null' => FALSE
+            ),
             'user_id' => array(
                 'type' => 'INT',
                 'constraint' => 11,
                 'unsigned' => TRUE,
                 'null' => FALSE
             ),
-            'category_id' => array(
-                'type' => 'INT',
-                'constraint' => 11,
-                'unsigned' => TRUE,
-                'null' => TRUE
-            ),
             'type' => array(
                 'type' => 'ENUM',
                 'constraint' => array('income', 'expense'),
                 'null' => FALSE
             ),
-            'amount' => array(
+            'transaction_date' => array(
+                'type' => 'DATE',
+                'null' => FALSE
+            ),
+            'store_name' => array(
+                'type' => 'VARCHAR',
+                'constraint' => 255,
+                'null' => TRUE
+            ),
+            'total_amount' => array(
                 'type' => 'DECIMAL',
                 'constraint' => '15,2',
+                'default' => 0,
                 'null' => FALSE
-            ),
-            'qty' => array(
-                'type' => 'INT',
-                'constraint' => 11,
-                'null' => FALSE
-            ),
-            'description' => array(
-                'type' => 'TEXT',
-                'null' => TRUE
             ),
             'source' => array(
                 'type' => 'VARCHAR',
                 'constraint' => 50,
-                'default' => 'web'
+                'default' => 'web',
+                'null' => FALSE
             ),
             'attachment_url' => array(
                 'type' => 'VARCHAR',
                 'constraint' => 500,
                 'null' => TRUE
             ),
-            'transaction_date' => array(
-                'type' => 'DATE',
-                'null' => FALSE
+            'notes' => array(
+                'type' => 'TEXT',
+                'null' => TRUE
             ),
             'created_at' => array(
                 'type' => 'DATETIME',
@@ -71,16 +75,18 @@ class Migration_Create_transactions_table extends CI_Migration
         ));
 
         $this->dbforge->add_key('id', TRUE);
+        $this->dbforge->add_key('business_id');
         $this->dbforge->add_key('user_id');
-        $this->dbforge->add_key('category_id');
         $this->dbforge->add_key('type');
         $this->dbforge->add_key('transaction_date');
 
         $this->dbforge->create_table('transactions', TRUE);
 
         // Add foreign keys
-        $this->db->query('ALTER TABLE transactions ADD CONSTRAINT fk_transactions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE');
-        $this->db->query('ALTER TABLE transactions ADD CONSTRAINT fk_transactions_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL');
+        $this->db->query('ALTER TABLE transactions ADD CONSTRAINT fk_transactions_business 
+            FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE');
+        $this->db->query('ALTER TABLE transactions ADD CONSTRAINT fk_transactions_user 
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE');
     }
 
     public function down()

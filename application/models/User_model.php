@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * User Model
  * 
  * Handles all user-related database operations including
- * OAuth authentication and Telegram integration.
+ * OAuth authentication, Telegram integration, and business membership.
  */
 class User_model extends CI_Model
 {
@@ -22,6 +22,18 @@ class User_model extends CI_Model
     public function find($id)
     {
         return $this->db->get_where($this->table, array('id' => $id))->row();
+    }
+
+    /**
+     * Find user by ID with business info
+     */
+    public function find_with_business($id)
+    {
+        $this->db->select('users.*, businesses.name as business_name');
+        $this->db->from($this->table);
+        $this->db->join('businesses', 'businesses.id = users.business_id', 'left');
+        $this->db->where('users.id', $id);
+        return $this->db->get()->row();
     }
 
     /**
@@ -80,12 +92,22 @@ class User_model extends CI_Model
 
             return $this->find($existing->id);
         } else {
+            // Create new user with their own business
+            $this->load->model('Business_model');
+
+            // Create a default business for the user
+            $business_id = $this->Business_model->create(array(
+                'name' => $data['name'] . "'s Business"
+            ));
+
             // Create new user
             $insert_data = array(
+                'business_id' => $business_id,
                 'google_id' => $data['google_id'],
                 'email' => $data['email'],
                 'name' => $data['name'],
                 'avatar' => isset($data['avatar']) ? $data['avatar'] : null,
+                'role' => 'owner',
                 'profile_completed' => 0,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
@@ -158,6 +180,33 @@ class User_model extends CI_Model
             'updated_at' => date('Y-m-d H:i:s')
         ));
 
+        return $this->find($user_id);
+    }
+
+    /**
+     * Get user's business
+     */
+    public function get_business($user_id)
+    {
+        $user = $this->find($user_id);
+        if ($user && $user->business_id) {
+            $this->load->model('Business_model');
+            return $this->Business_model->find($user->business_id);
+        }
+        return null;
+    }
+
+    /**
+     * Set user's business
+     */
+    public function set_business($user_id, $business_id, $role = 'staff')
+    {
+        $this->db->where('id', $user_id);
+        $this->db->update($this->table, array(
+            'business_id' => $business_id,
+            'role' => $role,
+            'updated_at' => date('Y-m-d H:i:s')
+        ));
         return $this->find($user_id);
     }
 }

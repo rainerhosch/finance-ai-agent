@@ -74,6 +74,7 @@ $route['api/v1/user/profile'] = 'api/v1/user/profile';
 $route['api/v1/transaction'] = 'api/v1/transaction/index';
 $route['api/v1/transaction/create'] = 'api/v1/transaction/create';
 $route['api/v1/transaction/summary'] = 'api/v1/transaction/summary';
+$route['api/v1/transaction/(:num)'] = 'api/v1/transaction/show/$1';
 $route['api/v1/transaction/delete/(:num)'] = 'api/v1/transaction/delete/$1';
 
 // API v1 routes - Masterdata
