@@ -7,7 +7,7 @@ application/logs/*
 .env
 database_setup.sql
 dbfile
-n8n-workflow
+# n8n-workflow
 
 !application/*/.htaccess
 composer.lock

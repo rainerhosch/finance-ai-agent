@@ -93,23 +93,49 @@ class API_Controller extends CI_Controller
      */
     protected function authenticate()
     {
+        // First try Bearer token
         $auth_header = $this->input->get_request_header('Authorization');
 
-        if (empty($auth_header)) {
-            $this->json_response(['error' => 'Authorization header required'], 401);
+        if (!empty($auth_header) && preg_match('/^Bearer\s+(.+)$/', $auth_header, $matches)) {
+            $token = $matches[1];
+            $this->user = $this->User_model->find_by_api_token($token);
+            if ($this->user) {
+                return true;
+            }
+        }
+
+        // Then try telegram_id from request body or query string
+        $input = $this->get_json_input();
+        $telegram_id = isset($input['telegram_id']) ? $input['telegram_id'] : $this->input->get('telegram_id');
+
+        if (!empty($telegram_id)) {
+            $this->user = $this->User_model->find_by_telegram_id($telegram_id);
+            if ($this->user) {
+                return true;
+            }
+        }
+
+        $this->json_response(['error' => 'Authentication required. Provide Bearer token or telegram_id'], 401);
+        return false;
+    }
+
+    /**
+     * Authenticate via telegram_id only (for bot requests)
+     */
+    protected function authenticate_telegram()
+    {
+        $input = $this->get_json_input();
+        $telegram_id = isset($input['telegram_id']) ? $input['telegram_id'] : $this->input->get('telegram_id');
+
+        if (empty($telegram_id)) {
+            $this->json_response(['error' => 'telegram_id diperlukan'], 400);
             return false;
         }
 
-        if (!preg_match('/^Bearer\s+(.+)$/', $auth_header, $matches)) {
-            $this->json_response(['error' => 'Invalid authorization format'], 401);
-            return false;
-        }
-
-        $token = $matches[1];
-        $this->user = $this->User_model->find_by_api_token($token);
+        $this->user = $this->User_model->find_by_telegram_id($telegram_id);
 
         if (!$this->user) {
-            $this->json_response(['error' => 'Invalid API token'], 401);
+            $this->json_response(['error' => 'User tidak ditemukan. Hubungkan Telegram di website terlebih dahulu.'], 404);
             return false;
         }
 
