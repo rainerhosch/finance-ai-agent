@@ -68,7 +68,7 @@ class Dashboard extends Auth_Controller
         $update_data = array(
             'name' => $this->input->post('name'),
             'phone' => $this->input->post('phone'),
-            'telegram_user_id' => $this->input->post('telegram_user_id')
+            // 'telegram_user_id' => $this->input->post('telegram_user_id')
         );
 
         $updated_user = $this->User_model->update_profile($user['id'], $update_data);

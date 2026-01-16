@@ -59,7 +59,7 @@
                     class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none">
             </div>
 
-            <div>
+            <!-- <div>
                 <label class="block text-sm font-medium text-slate-700 mb-2">Telegram User ID</label>
                 <input type="text" name="telegram_user_id"
                     value="<?= set_value('telegram_user_id', $user_detail->telegram_user_id) ?>"
@@ -67,7 +67,7 @@
                     class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none">
                 <p class="text-xs text-slate-500 mt-1">Dapatkan ID Anda dengan mengirim /start ke @userinfobot di
                     Telegram</p>
-            </div>
+            </div> -->
 
             <button type="submit"
                 class="w-full gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">

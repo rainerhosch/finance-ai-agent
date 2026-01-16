@@ -1,0 +1,1393 @@
+{
+    "name": "incatat.id - Telegram Bot",
+    "nodes": [
+        {
+            "parameters": {
+                "updates": [
+                    "message"
+                ],
+                "additionalFields": []
+            },
+            "id": "f88c8ad7-4d66-4a9d-a53a-803cc3630679",
+            "name": "Telegram Trigger",
+            "type": "n8n-nodes-base.telegramTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                -912,
+                80
+            ],
+            "webhookId": "672ed5f0-ff4d-4b13-a814-f175633b2ddb",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 1
+                    },
+                    "conditions": [
+                        {
+                            "id": "condition-photo",
+                            "leftValue": "={{ $('Switch').item.json.message.photo }}",
+                            "rightValue": "",
+                            "operator": {
+                                "type": "array",
+                                "operation": "exists",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": []
+            },
+            "id": "fd9a5d5a-424c-4b3a-b4be-9f4f22e7c90e",
+            "name": "Has Photo?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                416,
+                -272
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Parse text command\nconst text = $('Telegram Trigger').first().json.message?.text || '';\nconst message = $('Telegram Trigger').first().json.message;\nconst chatId = message.chat.id;\nconst telegramId = message.from.id;\n\n// --- HELPER FUNCTIONS ---\n\nfunction extractAmount(str) {\n  // PERBAIKAN DI SINI:\n  // Menambahkan '|j' ke dalam regex agar mengenali '5j'\n  const amountMatch = str.match(/\\b(\\d+(?:[.,]\\d+)*(?:k|rb|jt|j)?)\\b/i);\n  \n  if (amountMatch) {\n    let raw = amountMatch[1].toLowerCase().replace(/,/g, ''); \n    let multiplier = 1;\n    \n    // Logic untuk Ribuan\n    if (raw.includes('k') || raw.includes('rb')) {\n      multiplier = 1000;\n      raw = raw.replace(/k|rb/, '');\n    } \n    // Logic untuk Jutaan (jt atau j)\n    else if (raw.includes('jt')) {\n      multiplier = 1000000;\n      raw = raw.replace('jt', '');\n    } \n    else if (raw.includes('j')) { // Tambahan handle untuk 'j'\n      multiplier = 1000000;\n      raw = raw.replace('j', '');\n    }\n    \n    // Hapus titik ribuan (misal 50.000 jadi 50000)\n    raw = raw.replace(/\\./g, '');\n    \n    // Pastikan hasil parsing adalah angka valid\n    const parsedValue = parseFloat(raw);\n    if (isNaN(parsedValue)) return null;\n\n    return {\n      value: parsedValue * multiplier,\n      originalString: amountMatch[0]\n    };\n  }\n  return null;\n}\n\nfunction cleanDescription(fullText, commandToRemove, amountStringToRemove) {\n  let clean = fullText;\n  if (commandToRemove) clean = clean.replace(commandToRemove, '');\n  if (amountStringToRemove) clean = clean.replace(amountStringToRemove, '');\n  // Hapus karakter non-alphanumeric di awal string (sisa spasi atau tanda baca)\n  return clean.replace(/^\\W+/, '').replace(/\\s+/g, ' ').trim();\n}\n\n// --- MAIN LOGIC ---\n\n// 1. HANDLER PEMASUKAN (/pemasukan ...)\nif (text.toLowerCase().startsWith('/pemasukan')) {\n  const amountData = extractAmount(text);\n  \n  if (amountData) {\n    return [{\n      json: {\n        valid: true,\n        action: 'input_data',\n        type: 'income',\n        amount: amountData.value,\n        description: cleanDescription(text, '/pemasukan', amountData.originalString),\n        date_raw: 'today', // Default today, nanti dihandle AI/Date parser\n        telegram_id: telegramId,\n        chat_id: chatId\n      }\n    }];\n  }\n}\n\n// 2. HANDLER PENGELUARAN (beli ... atau /pengeluaran)\nif (text.toLowerCase().startsWith('beli') || text.toLowerCase().startsWith('/pengeluaran')) {\n  const amountData = extractAmount(text);\n  \n  if (amountData) {\n    // Tentukan command penghapus (beli atau /pengeluaran)\n    const command = text.toLowerCase().startsWith('beli') ? 'beli' : '/pengeluaran';\n    \n    return [{\n      json: {\n        valid: true,\n        action: 'input_data',\n        type: 'expense',\n        amount: amountData.value,\n        description: cleanDescription(text, command, amountData.originalString),\n        telegram_id: telegramId,\n        chat_id: chatId\n      }\n    }];\n  }\n}\n\n// 3. HANDLER EXPORT\nconst exportMatch = text.match(/^\\/export\\s+(pemasukan|pengeluaran|semua)?\\s*(.*)$/i);\nif (exportMatch) {\n  return [{\n    json: {\n      valid: true,\n      action: 'export',\n      category: exportMatch[1] || 'semua',\n      period: exportMatch[2] || 'bulan ini',\n      telegram_id: telegramId,\n      chat_id: chatId\n    }\n  }];\n}\n\n// 4. HANDLER LAPORAN\nconst reportMatch = text.match(/^\\/laporan\\s+(pemasukan|pengeluaran)\\s*(.*)$/i);\nif (reportMatch) {\n  return [{\n    json: {\n      valid: true,\n      action: 'report',\n      category: reportMatch[1],\n      period: reportMatch[2] || 'hari ini',\n      chat_id: chatId\n    }\n  }];\n}\n\n// 5. HANDLER SALDO\nif (text.startsWith('/saldo')) {\n  return [{\n    json: {\n      valid: true,\n      action: 'check_balance',\n      telegram_id: telegramId,\n      chat_id: chatId\n    }\n  }];\n}\n\n// 6. HANDLER HELP/START\nif (text.startsWith('/start') || text.startsWith('/help')) {\n  return [{\n    json: {\n      valid: true,\n      action: 'help',\n      chat_id: chatId\n    }\n  }];\n}\n\n// Fallback\nreturn [{ json: { valid: false, original_text: text } }];"
+            },
+            "id": "99d57c7a-1c44-4b85-b5df-40538f988158",
+            "name": "Parse Text Command",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                432,
+                64
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://incatat.id/api/v1/transaction/create",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify({\ntelegram_id: $('Telegram Trigger').item.json.message.from.id,\ntype: $json.type,\nitems: [{\n  name: $json.item_name,\n  qty: $json.quantity || 1,\n  price: $json.amount,\n  category_id: $json.category_id\n}],\nnotes: $json.description\n}) }}",
+                "options": []
+            },
+            "id": "aeae56ec-b2b4-4ed9-96ba-ea4b97137fbe",
+            "name": "Create Transaction",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                1824,
+                192
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $json.chatId }}",
+                "text": "=\u2705 {{ $json.typeItems }} Rp {{ $json.totalAmount.toLocaleString('id-ID') }} berhasil dicatat!\n\n\ud83d\udcdd Keperluan: {{ $json.desc }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "id": "af4e41e1-df70-4f91-807d-deac06db7ac8",
+            "name": "Send Confirmation",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                2352,
+                80
+            ],
+            "webhookId": "3d908a2c-033a-4b7b-bfa9-fb0aaae5c480",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "=https://incatat.id/api/v1/user/verify?telegram_id={{ $json.message.from.id }}",
+                "options": []
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                -448,
+                80
+            ],
+            "id": "70d08304-7496-4110-8a8d-fbc09ac8f7bc",
+            "name": "HTTP Request"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 3
+                    },
+                    "conditions": [
+                        {
+                            "id": "7325bf93-5317-4347-8f7c-eafcb83c4fb5",
+                            "leftValue": "={{ $json.registered }}",
+                            "rightValue": false,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": []
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                -304,
+                80
+            ],
+            "id": "c1fb9f2b-b0d0-474a-aab8-9ecced4da88e",
+            "name": "If"
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "=\u26a0\ufe0f Akun Telegram Anda belum terhubung!\\n\\nSilakan balas pesan ini dengan mengirimkan **Alamat Email** Anda yang terdaftar di incatat.id untuk menghubungkan.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "id": "22b26226-94f2-4eef-96af-74268cbe5861",
+            "name": "Send Alert Unregisted",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                -80,
+                384
+            ],
+            "webhookId": "3c823157-0857-4919-b87c-5cdf9972f4d7",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "=\ud83d\udc4b Hi, {{ $json.user.name }}.\nSelamat datang di incatat.id Bot!\nAku adalah Asisten Pencatatan Keuangan Pintar.\n\nSaat ini aku bisa memberi pelayanan sebagai berikut:\n\ud83d\udcf7 *Kirim foto struk untuk pencatatan `pengeluaran` otomatis!* \n\ud83d\uded2 *Ketik pembelian* \u2192 contoh: `beli telur 20rb di warung Madura`\n\ud83e\uddfe *Catat pemasukan* \u2192 contoh: `/pemasukan jual brownis panggang 45K, sebanyak 200 box, toko cabang cisereuh. tanggal 10/05/2021`\n\ud83d\udcca *Cek Laporan Pemasukan* \u2192 contoh: `/laporan pemasukan hari ini`\n\ud83d\udcca *Cek Laporan Pengeluaran* \u2192 contoh: `/laporan pengeluaran hari ini`\n\ud83e\uddfe *Cek cashflow (saldo) bulan ini* \u2192 contoh: `/saldo` \n\n\u2728 Fitur Baru: Ekspor Laporan Keuangan\nAnda sekarang bisa mengekspor laporan keuangan dalam format Excel (.xlsx) dengan berbagai opsi.\n\nContoh penggunaan:\n/export pengeluaran bulan ini\n/export pengeluaran bulan lalu\n/export pengeluaran bulan juli-oktober tahun lalu\n/export pemasukan tahun ini\n\n\ud83d\udccc Daftar Command:\n\u2022 /laporan pengeluaran hari ini\n\u2022 /laporan pemasukan minggu ini\n\u2022 /laporan pengeluaran bulan ini\n\u2022 /export [pemasukan/pengeluaran] [rentang waktu] \u2192 `Ekspor laporan ke file Excel`\n\u2022 /help \u2192 `Panduan penggunaan`\n\n\n\u2728 Mulai dengan kirim foto struk atau ketik belanja Anda!\n",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "id": "e7f14388-6a34-4aef-a0c2-b1e29ebb6160",
+            "name": "Send Help",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                -448,
+                336
+            ],
+            "webhookId": "3c823157-0857-4919-b87c-5cdf9972f4d7",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.message.photo[1] }}",
+                                        "rightValue": "",
+                                        "operator": {
+                                            "type": "object",
+                                            "operation": "exists",
+                                            "singleValue": true
+                                        },
+                                        "id": "c8a1113c-7349-449d-9c8c-7dd8fcd49b12"
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "b621d78e-1933-4e5c-a48f-20b296c1ea1d",
+                                        "leftValue": "={{ $json.message.text }}",
+                                        "rightValue": "/laporan",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "e752d322-2db2-4940-92cc-c0e42586a24e",
+                                        "leftValue": "={{ $json.message.text }}",
+                                        "rightValue": "/export",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "f886fa83-ff82-4c61-8676-728f69e8d289",
+                                        "leftValue": "={{ $json.message.text }}",
+                                        "rightValue": "/help",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "8f1f3ec8-124a-4b4b-a9cf-d0a51e619bd4",
+                                        "leftValue": "={{ $json.message.text }}",
+                                        "rightValue": "/hapus",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "27d433e9-48b0-44b6-8801-6c33614fe13a",
+                                        "leftValue": "={{ $json.message.text }}",
+                                        "rightValue": "/start",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "9da4f235-4f38-4138-8ef5-a5dd7cf24aa0",
+                                        "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                                        "rightValue": "",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "exists",
+                                            "singleValue": true
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        }
+                    ]
+                },
+                "options": []
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3.2,
+            "position": [
+                -656,
+                0
+            ],
+            "id": "e93c2bb0-1343-4106-9d7e-9bc178fbfbb5",
+            "name": "Switch"
+        },
+        {
+            "parameters": {
+                "resource": "file",
+                "fileId": "={{ $('Telegram Trigger').item.json.message.photo[1].file_id }}",
+                "additionalFields": []
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                976,
+                -416
+            ],
+            "id": "1929b115-eac6-4068-ba91-e0a270f893e5",
+            "name": "Get a file",
+            "webhookId": "7d338daa-0c41-41bb-a6f5-b0d294c01ef0",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// 1. Ambil Data Input & Context Kategori\nconst item = $input.first();\n// Pastikan node sebelumnya mengirimkan 'category_context'. \n// Jika kosong, berikan string kosong agar tidak error/undefined di prompt.\nconst categoryContext = $('Code in JavaScript4').first().json.category_context || \"No categories provided.\";\n\n// 2. Persiapan Data Gambar (Binary)\nconst binaryPropertyName = 'data'; // Sesuaikan jika nama field binary Anda beda\n\nif (!item.binary || !item.binary[binaryPropertyName]) {\n  throw new Error(`Binary data '${binaryPropertyName}' tidak ditemukan!`);\n}\n\n// Baca Buffer & Convert ke Base64\nconst buffer = await this.helpers.getBinaryDataBuffer(0, binaryPropertyName);\nconst base64String = buffer.toString('base64');\n\n// Fix MIME Type (Paksa jadi image/jpeg jika octet-stream)\nlet mimeType = item.binary[binaryPropertyName].mimeType;\nif (mimeType === 'application/octet-stream' || !mimeType) {\n  mimeType = 'image/jpeg';\n}\n\n// 3. Susun Prompt Text (Dynamic dengan Template Literal)\nconst promptText = `\nAnalyze the receipt image provided and extract financial transaction details into structured JSON.\n\n### DATA SOURCE:\nUse the following list of valid categories to assign the correct category_id.\nFORMAT: ID - Name (Type)\n---------------------\n${categoryContext}\n---------------------\n\n### RULES:\n1.  **Analyze Input**: Extract every line item found in the receipt image.\n2.  **Match Category**:\n    * For each item, find the MOST relevant Category ID from the list above based on the item name and type (income/expense).\n    * If item is \"Bensin\", look for \"Transport\" or \"Bahan Bakar\" in the list.\n    * If NO match found, use logic to pick \"Lain-lain\" or \"General\" ID (or return null if strictly unknown).\n    * **CRITICAL**: You MUST output the category_id (Integer).\n3.  **Extract Data**: item_name, amount (number), type (usually 'expense' for receipts), quantity, description.\n4.  **Formatting**: Ensure amounts are pure numbers (no Rp, no dots/commas as separators).\n5.  **Calculations**: Count all amounts to get the 'total_amount' field.\n\n### OUTPUT JSON EXAMPLE:\n{\n  \"transactions\": [\n    {\n      \"item_name\": \"Bensin Pertalite\",\n      \"amount\": 20000,\n      \"type\": \"expense\",\n      \"category_id\": 15, \n      \"quantity\": 1,\n      \"description\": \"isi bensin di spbu\"\n    }\n  ],\n  \"total_amount\": 20000\n}\n\nIMPORTANT: Return ONLY valid JSON. No markdown formatting like \\`\\`\\`json.`;\n\n// 4. Susun Payload Gemini\nconst geminiPayload = {\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": promptText\n        },\n        {\n          \"inline_data\": {\n            \"mime_type\": mimeType,\n            \"data\": base64String\n          }\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"responseMimeType\": \"application/json\"\n  }\n};\n\n// 5. Return Output\nreturn [{\n  json: {\n    gemini_payload: geminiPayload,\n    debug_mime: mimeType\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1136,
+                -416
+            ],
+            "id": "23953b66-045b-4b73-b898-13fde83c3553",
+            "name": "Code"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyD9JNW1jiggRCAzLjTO6bHO-qmUFLC0TcM",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ $json.gemini_payload }}",
+                "options": []
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                1328,
+                -416
+            ],
+            "id": "0e783336-eb26-46e2-b9be-4a9072efba95",
+            "name": "HTTP Request2"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 3
+                    },
+                    "conditions": [
+                        {
+                            "id": "9ce2dcd6-71c1-4abe-95e5-403d78c7f5c4",
+                            "leftValue": "={{ $json.valid }}",
+                            "rightValue": false,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": []
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                752,
+                64
+            ],
+            "id": "cc83be5c-6b38-4d07-9039-9f7160609dc7",
+            "name": "If2"
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "=keyword `{{ $json.original_text }}` tidak ada dalam daftar perintah.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1104,
+                80
+            ],
+            "id": "e276a48a-fc91-44d7-bbf1-72ad291ad35b",
+            "name": "Send Alert Keywod Error",
+            "webhookId": "607afefb-61db-4bb9-863a-0373ba6bece7",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+                "options": {
+                    "systemMessage": "=You are an expert Financial Transaction Parser. Parse user text into structured JSON.\n\n### DATA SOURCE:\nUse the following list of valid categories to assign the correct `category_id`.\nFORMAT: ID - Name (Type)\n---------------------\n{{ $json.category_context }}\n---------------------\n\n### RULES:\n1.  **Analyze Input**: Split multiple items if present.\n2.  **Match Category**:\n    * For each item, find the MOST relevant Category ID from the list above based on the item name and type (income/expense).\n    * If \"beli bensin\", look for \"Transport\" or \"Bahan Bakar\".\n    * If NO match found, use logic to pick \"Lain-lain\" or \"General\" ID (or return null if strictly unknown).\n    * **CRITICAL**: You MUST output the `category_id` (Integer).\n3.  **Extract Data**: item_name, amount (number), type (income/expense), quantity, description.\n4.  **Formatting**: Handle 'k', 'rb', 'jt' suffixes for amounts.\n5. conut all amount to get total_amount\n\n### OUTPUT JSON EXAMPLE:\n{\n  \"transactions\": [\n    {\n      \"item_name\": \"Bensin Pertalite\",\n      \"amount\": 20000,\n      \"type\": \"expense\",\n      \"category_id\": 15, \n      \"quantity\": 1,\n      \"description\": \"isi bensin di spbu\"\n    }\n  ],\n  \"total_amount\": 20000\n}"
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                1056,
+                688
+            ],
+            "id": "733fb552-271a-4d3d-bade-a70edaa7b669",
+            "name": "AI Agent"
+        },
+        {
+            "parameters": {
+                "options": []
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                976,
+                928
+            ],
+            "id": "40e6034d-493f-4130-a7ea-301b1941163c",
+            "name": "Google Gemini Chat Model",
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "P9kaQtpZ7HtlgRhQ",
+                    "name": "Google Gemini(PaLM) Api account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $('Switch').item.json.message.photo[1] }}",
+                                        "rightValue": "",
+                                        "operator": {
+                                            "type": "object",
+                                            "operation": "exists",
+                                            "singleValue": true
+                                        },
+                                        "id": "c8a1113c-7349-449d-9c8c-7dd8fcd49b12"
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "b621d78e-1933-4e5c-a48f-20b296c1ea1d",
+                                        "leftValue": "={{ $('Switch').item.json.message.text }}",
+                                        "rightValue": "/laporan",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "e752d322-2db2-4940-92cc-c0e42586a24e",
+                                        "leftValue": "={{ $('Switch').item.json.message.text }}",
+                                        "rightValue": "/export",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "8f1f3ec8-124a-4b4b-a9cf-d0a51e619bd4",
+                                        "leftValue": "={{ $('Switch').item.json.message.text }}",
+                                        "rightValue": "/saldo",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "f886fa83-ff82-4c61-8676-728f69e8d289",
+                                        "leftValue": "={{ $('Switch').item.json.message.text }}",
+                                        "rightValue": "/help",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "27d433e9-48b0-44b6-8801-6c33614fe13a",
+                                        "leftValue": "={{ $('Switch').item.json.message.text }}",
+                                        "rightValue": "/start",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "contains"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "9da4f235-4f38-4138-8ef5-a5dd7cf24aa0",
+                                        "leftValue": "={{ $('Switch').item.json.message.text }}",
+                                        "rightValue": "=/pemasukan",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "exists",
+                                            "singleValue": true
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        }
+                    ]
+                },
+                "options": []
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3.2,
+            "position": [
+                -32,
+                -16
+            ],
+            "id": "597960ba-1eb0-41f8-aa25-6256425bfbf1",
+            "name": "Switch1"
+        },
+        {
+            "parameters": {
+                "jsCode": "// 1. Ambil string dari field \"output\" dari input pertama\nconst rawString = $input.first().json.output;\n\n// 2. Bersihkan formatting Markdown (jaga-jaga jika AI mengirim ```json di awal)\nconst cleanString = rawString.replace(/^```json\\s*|\\s*```$/g, '').trim();\n\nlet parsedData;\ntry {\n  // 3. Parse string menjadi Object Javascript\n  parsedData = JSON.parse(cleanString);\n} catch (error) {\n  throw new Error(`JSON Error: ${error.message}`);\n}\n\n// 4. Hitung total amount\nlet totalAmount = 0;\nif (parsedData.transactions && Array.isArray(parsedData.transactions)) {\n  totalAmount = parsedData.transactions.reduce((sum, item) => {\n    return sum + (item.amount || 0);\n  }, 0);\n\n  // Kembalikan array transaksi, tambahkan totalAmount sebagai properti tambahan di setiap item\n  return parsedData.transactions.map(item => {\n    return {\n      json: {\n        ...item,\n        // totalAmount\n      }\n    };\n  });\n} else {\n  return [{ json: parsedData }];\n}"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1376,
+                688
+            ],
+            "id": "5d52d922-780a-4d05-a5d3-6f45426c00ef",
+            "name": "Code in JavaScript"
+        },
+        {
+            "parameters": {
+                "jsCode": "// 1. Ambil respon dari Node HTTP Request (Input saat ini)\nconst apiResponse = $input.first().json;\nconst data = apiResponse.data || {};\n\n// 2. Ambil data pesan asli User dari Node Router\n// PENTING: Pastikan nama node di dalam $('...') sesuai dengan nama Node Router Anda.\n// Jika node router Anda bernama \"Router\", ganti jadi $('Router')\nconst userContext = $input.first().json;\n\nlet categoryList = [];\n\n// 3. Proses Array Expense (Pengeluaran)\nif (data.expense && Array.isArray(data.expense)) {\n  data.expense.forEach(item => {\n    // Format: ID - Nama (expense)\n    categoryList.push(`${item.id} - ${item.name} (expense)`);\n  });\n}\n\n// 4. Proses Array Income (Pemasukan)\nif (data.income && Array.isArray(data.income)) {\n  data.income.forEach(item => {\n    // Format: ID - Nama (income)\n    categoryList.push(`${item.id} - ${item.name} (income)`);\n  });\n}\n\n// 5. Gabungkan menjadi satu string panjang dengan baris baru\nconst contextString = categoryList.join('\\n');\n\n// 6. Return data gabungan (Data User + Context Kategori) ke AI Agent\nreturn [{\n  json: {\n    ...userContext, // Data asli (message text, chat id, dll)\n    category_context: contextString // Data baru untuk contekan AI\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                864,
+                688
+            ],
+            "id": "baad5cba-d32c-4208-b541-db11252083ef",
+            "name": "Code in JavaScript1"
+        },
+        {
+            "parameters": {
+                "url": "https://incatat.id/api/v1/masterdata/categories",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify({\ntelegram_id: $('Telegram Trigger').item.json.message.from.id,\ntype:$json.query_type\n}) }}",
+                "options": []
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                704,
+                688
+            ],
+            "id": "1c581353-5783-4cc5-aa18-436955616074",
+            "name": "HTTP Request3"
+        },
+        {
+            "parameters": {
+                "jsCode": "const message = $('Telegram Trigger').first().json.message\nconst text = message?.text || '';\nconst lowerText = text.toLowerCase();\n\nlet categoryType = ''; // Default kosong (ambil semua kategori)\n\n// 1. Logika Deteksi Pemasukan\nif (lowerText.startsWith('/pemasukan') || lowerText.startsWith('terima') || lowerText.startsWith('dapat')) {\n  categoryType = 'income';\n} \n\n// 2. Logika Deteksi Pengeluaran\n// Menangani: /pengeluaran, beli..., bayar..., jajan...\nelse if (\n  lowerText.startsWith('/pengeluaran') || \n  lowerText.startsWith('beli') || \n  lowerText.startsWith('bayar') ||\n  lowerText.startsWith('jajan')\n) {\n  categoryType = 'expense';\n}\n\n// 3. Output\nreturn [{\n  json: {\n    ...$input.first().json, // Pertahankan data lama\n    query_type: categoryType // Variable baru untuk API\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                528,
+                688
+            ],
+            "id": "acdfa64b-91c3-4a4b-8e57-0be7ee8067c7",
+            "name": "Code in JavaScript2"
+        },
+        {
+            "parameters": {
+                "jsCode": "const items = $input.all(); // ambil semua input array\nconst chatId = $('Telegram Trigger').first().json.message.chat.id;\nconst typeItems = $('Telegram Trigger').first().json.type === 'income' ? 'Pemasukan' : 'Pengeluaran';\n\n// Gabungkan semua description dari data\nconst descList = items\n  .map(item => item.json.data?.description)\n  .filter(d => d && d.trim() !== ''); // buang null/undefined/empty\nconst desc = descList.length > 0 ? descList.join(', ') : '-';\n\n// Hitung total amount dari semua transaksi\nconst totalAmount = items.reduce((sum, item) => {\n  return sum + (item.json.data?.amount || 0);\n}, 0);\n\n// Return hanya totalAmount + gabungan desc\nreturn [\n  {\n    json: {\n      totalAmount,\n      chatId,\n      typeItems,\n      desc\n    }\n  }\n];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2208,
+                80
+            ],
+            "id": "9af4ef46-b46c-46c2-9527-86888a29df4f",
+            "name": "Code in JavaScript3"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 3
+                    },
+                    "conditions": [
+                        {
+                            "id": "58abfdb0-4637-4e16-b918-e8931695c1fd",
+                            "leftValue": "={{ $json.success }}",
+                            "rightValue": false,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": []
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                2016,
+                192
+            ],
+            "id": "9cf88306-7950-494e-94ed-095de9999395",
+            "name": "If3"
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "=transaksi {{ $json.success }}, {{ $json.message }}.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                2368,
+                400
+            ],
+            "id": "900130d3-cd52-424f-b95b-39296f600a3d",
+            "name": "Send Alert Keywod Error1",
+            "webhookId": "607afefb-61db-4bb9-863a-0373ba6bece7",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "=Fitur {{ $json.action }} {{ $json.category }} belum Tersedia ",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                992,
+                -80
+            ],
+            "id": "753cf9eb-6f29-4845-81ee-387f5ce2404d",
+            "name": "Send Alert",
+            "webhookId": "607afefb-61db-4bb9-863a-0373ba6bece7",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "https://incatat.id/api/v1/masterdata/categories",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify({\ntelegram_id: $('Telegram Trigger').item.json.message.from.id,\ntype:$json.query_type\n}) }}",
+                "options": []
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                624,
+                -416
+            ],
+            "id": "6b822d76-fdee-4981-af0b-976f222b4882",
+            "name": "HTTP Request4"
+        },
+        {
+            "parameters": {
+                "jsCode": "// 1. Ambil respon dari Node HTTP Request (Input saat ini)\nconst apiResponse = $input.first().json;\nconst data = apiResponse.data || {};\n\n// 2. Ambil data pesan asli User dari Node Router\n// PENTING: Pastikan nama node di dalam $('...') sesuai dengan nama Node Router Anda.\n// Jika node router Anda bernama \"Router\", ganti jadi $('Router')\nconst userContext = $input.first().json;\n\nlet categoryList = [];\n\n// 3. Proses Array Expense (Pengeluaran)\nif (data.expense && Array.isArray(data.expense)) {\n  data.expense.forEach(item => {\n    // Format: ID - Nama (expense)\n    categoryList.push(`${item.id} - ${item.name} (expense)`);\n  });\n}\n\n// 4. Proses Array Income (Pemasukan)\nif (data.income && Array.isArray(data.income)) {\n  data.income.forEach(item => {\n    // Format: ID - Nama (income)\n    categoryList.push(`${item.id} - ${item.name} (income)`);\n  });\n}\n\n// 5. Gabungkan menjadi satu string panjang dengan baris baru\nconst contextString = categoryList.join('\\n');\n\n// 6. Return data gabungan (Data User + Context Kategori) ke AI Agent\nreturn [{\n  json: {\n    ...userContext, // Data asli (message text, chat id, dll)\n    category_context: contextString // Data baru untuk contekan AI\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                800,
+                -416
+            ],
+            "id": "51609d51-ece9-4239-ad05-dd151f8abd58",
+            "name": "Code in JavaScript4"
+        },
+        {
+            "parameters": {
+                "jsCode": "// 1. Ambil string dari field \"output\" dari input pertama\nconst rawString = $input.first().json.candidates[0].content.parts[0].text;\n\n// 2. Bersihkan formatting Markdown (jaga-jaga jika AI mengirim ```json di awal)\nconst cleanString = rawString.replace(/^```json\\s*|\\s*```$/g, '').trim();\n\nlet parsedData;\ntry {\n  // 3. Parse string menjadi Object Javascript\n  parsedData = JSON.parse(cleanString);\n} catch (error) {\n  throw new Error(`JSON Error: ${error.message}`);\n}\n\n// 4. Hitung total amount\nlet totalAmount = 0;\nif (parsedData.transactions && Array.isArray(parsedData.transactions)) {\n  totalAmount = parsedData.transactions.reduce((sum, item) => {\n    return sum + (item.amount || 0);\n  }, 0);\n\n  // Kembalikan array transaksi, tambahkan totalAmount sebagai properti tambahan di setiap item\n  return parsedData.transactions.map(item => {\n    return {\n      json: {\n        ...item,\n        // totalAmount\n      }\n    };\n  });\n} else {\n  return [{ json: parsedData }];\n}"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1536,
+                -416
+            ],
+            "id": "301072ab-8ca2-4466-9d62-163e5e68c5ab",
+            "name": "Code in JavaScript5"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 1
+                    },
+                    "conditions": [
+                        {
+                            "id": "is-email",
+                            "leftValue": "={{ /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/.test($('Telegram Trigger').item.json.message.text) }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": []
+            },
+            "id": "check-email-format",
+            "name": "Check Email Format",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                -200,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://incatat.id/api/v1/user/link-telegram",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify({\n  email: $('Telegram Trigger').item.json.message.text,\n  telegram_id: $('Telegram Trigger').item.json.message.from.id,\n  username: $('Telegram Trigger').item.json.message.from.username,\n  first_name: $('Telegram Trigger').item.json.message.from.first_name,\n  label: 'Telegram Bot'\n}) }}",
+                "options": []
+            },
+            "id": "link-telegram-api",
+            "name": "Link Telegram API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                50,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+                "text": "=\u2705 {{ $json.message || 'Akun berhasil dihubungkan!' }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "id": "send-link-success",
+            "name": "Send Link Success",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                300,
+                200
+            ],
+            "webhookId": "link-success-webhook",
+            "credentials": {
+                "telegramApi": {
+                    "id": "dS08rsULHhgTI5tb",
+                    "name": "Telegram account"
+                }
+            }
+        }
+    ],
+    "pinData": [],
+    "connections": {
+        "Telegram Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Switch",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Has Photo?": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request4",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Parse Text Command": {
+            "main": [
+                [
+                    {
+                        "node": "If2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Transaction": {
+            "main": [
+                [
+                    {
+                        "node": "If3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request": {
+            "main": [
+                [
+                    {
+                        "node": "If",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If": {
+            "main": [
+                [
+                    {
+                        "node": "Switch1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Check Email Format",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Send Help",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Help",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get a file": {
+            "main": [
+                [
+                    {
+                        "node": "Code",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If2": {
+            "main": [
+                [
+                    {
+                        "node": "Send Alert",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Alert Keywod Error",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch1": {
+            "main": [
+                [
+                    {
+                        "node": "Has Photo?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Parse Text Command",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Parse Text Command",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Parse Text Command",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Parse Text Command",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Parse Text Command",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Code in JavaScript2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript": {
+            "main": [
+                [
+                    {
+                        "node": "Create Transaction",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript1": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request3": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript2": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript3": {
+            "main": [
+                [
+                    {
+                        "node": "Send Confirmation",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If3": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Alert Keywod Error1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request4": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript4",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript4": {
+            "main": [
+                [
+                    {
+                        "node": "Get a file",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request2": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript5",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript5": {
+            "main": [
+                [
+                    {
+                        "node": "Create Transaction",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Email Format": {
+            "main": [
+                [
+                    {
+                        "node": "Link Telegram API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Alert Unregisted",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Link Telegram API": {
+            "main": [
+                [
+                    {
+                        "node": "Send Link Success",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {
+        "executionOrder": "v1",
+        "availableInMCP": false
+    },
+    "versionId": "8d522cbe-2140-4dca-a347-91b6be149694",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "55dd70f2c62fed27e47bb7d406037addccd141087e28ea2983f0b32d42c1f91b"
+    },
+    "id": "JkXX6WSkgT6T-DeWk28pC",
+    "tags": []
+}

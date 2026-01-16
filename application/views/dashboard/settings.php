@@ -129,8 +129,10 @@
 
                 <div class="pt-2 border-t">
                     <p class="text-sm text-slate-500 mb-3">
-                        <i class="fa-solid fa-plus-circle mr-1"></i>Tambah akun Telegram lain? Buka @incatat_bot dan kirim
-                        /start
+                        <i class="fa-solid fa-plus-circle mr-1"></i>Tambah akun Telegram lain? <br>
+                        Buka <a href="https://t.me/incatatbot" target="_blank" class="text-blue-500">@incatatbot</a> dan
+                        ketik
+                        <i>/hubungkan bussinesmail@mail.com</i>
                     </p>
                 </div>
             <?php else: ?>
