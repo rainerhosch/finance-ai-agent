@@ -53,10 +53,20 @@ class User_model extends CI_Model
     }
 
     /**
-     * Find user by Telegram ID
+     * Find user by Telegram ID (checks telegram_accounts table)
+     * Returns user object if found in telegram_accounts, falls back to users table for backward compatibility
      */
     public function find_by_telegram_id($telegram_id)
     {
+        // First check telegram_accounts table (new method)
+        $this->load->model('Telegram_account_model');
+        $account = $this->Telegram_account_model->find_by_telegram_id($telegram_id);
+
+        if ($account) {
+            return $this->find($account->user_id);
+        }
+
+        // Fallback to old telegram_user_id in users table (backward compatibility)
         return $this->db->get_where($this->table, array('telegram_user_id' => $telegram_id))->row();
     }
 
@@ -170,17 +180,20 @@ class User_model extends CI_Model
     }
 
     /**
-     * Link Telegram account to user
+     * Link Telegram account to user (saves to telegram_accounts table)
      */
-    public function link_telegram($user_id, $telegram_user_id)
+    public function link_telegram($user_id, $telegram_user_id, $telegram_data = array())
     {
-        $this->db->where('id', $user_id);
-        $this->db->update($this->table, array(
-            'telegram_user_id' => $telegram_user_id,
-            'updated_at' => date('Y-m-d H:i:s')
-        ));
+        $this->load->model('Telegram_account_model');
 
-        return $this->find($user_id);
+        // Create entry in telegram_accounts table
+        return $this->Telegram_account_model->create(array(
+            'user_id' => $user_id,
+            'telegram_user_id' => $telegram_user_id,
+            'telegram_username' => isset($telegram_data['username']) ? $telegram_data['username'] : null,
+            'telegram_first_name' => isset($telegram_data['first_name']) ? $telegram_data['first_name'] : null,
+            'label' => isset($telegram_data['label']) ? $telegram_data['label'] : null
+        ));
     }
 
     /**

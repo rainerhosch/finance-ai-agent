@@ -21,7 +21,7 @@
         <!-- Header with Avatar -->
         <div class="gradient-bg p-8 text-center">
             <?php if (!empty($user_detail->avatar)): ?>
-                <img src="<?= $user_detail->avatar ?>" alt="Avatar"
+                <img src="<?= base_url($user_detail->avatar) ?>" alt="Avatar"
                     class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-lg">
             <?php else: ?>
                 <div
