@@ -70,10 +70,12 @@ $route['dashboard/transactions'] = 'dashboard/transactions';
 $route['dashboard/settings'] = 'dashboard/settings';
 $route['dashboard/settings/update-business'] = 'dashboard/update_business';
 $route['dashboard/set_password'] = 'dashboard/set_password';
+$route['dashboard/remove_telegram/(:num)'] = 'dashboard/remove_telegram/$1';
 
 // API v1 routes - User
 $route['api/v1/user/verify'] = 'api/v1/user/verify';
 $route['api/v1/user/link-telegram'] = 'api/v1/user/link_telegram';
+$route['api/v1/user/unlink-telegram'] = 'api/v1/user/unlink_telegram';
 $route['api/v1/user/profile'] = 'api/v1/user/profile';
 
 // API v1 routes - Transaction

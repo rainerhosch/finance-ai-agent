@@ -73,34 +73,72 @@
         </div>
     </div>
 
-    <!-- Telegram Bot Connection -->
+    <!-- Telegram Accounts Section -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="p-6 border-b">
-            <h3 class="text-lg font-semibold text-slate-800">Telegram Bot</h3>
-            <p class="text-slate-500 text-sm mt-1">Hubungkan akun dengan Telegram Bot untuk mencatat transaksi via chat
-            </p>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-brands fa-telegram text-blue-500 mr-2"></i>Akun Telegram
+                    </h3>
+                    <p class="text-slate-500 text-sm mt-1">Hubungkan akun Telegram untuk mencatat transaksi via chat</p>
+                </div>
+            </div>
         </div>
 
-        <div class="p-6">
-            <?php if ($user_detail->telegram_user_id): ?>
-                <div class="flex items-center gap-3 p-4 bg-green-50 rounded-xl">
-                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="font-semibold text-green-800">Terhubung</div>
-                        <div class="text-sm text-green-600">Telegram ID:
-                            <?= $user_detail->telegram_user_id ?>
+        <div class="p-6 space-y-4">
+            <?php if (!empty($telegram_accounts)): ?>
+                <!-- List of connected accounts -->
+                <div class="space-y-3">
+                    <?php foreach ($telegram_accounts as $account): ?>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fa-brands fa-telegram text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-green-800">
+                                        <?= htmlspecialchars($account->telegram_first_name ?: $account->telegram_username ?: 'Telegram') ?>
+                                        <?php if ($account->is_primary): ?>
+                                            <span
+                                                class="ml-2 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">Utama</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="text-sm text-green-600">
+                                        <?php if ($account->telegram_username): ?>
+                                            @<?= htmlspecialchars($account->telegram_username) ?> ·
+                                        <?php endif; ?>
+                                        <?php if ($account->label): ?>
+                                            <?= htmlspecialchars($account->label) ?>
+                                        <?php else: ?>
+                                            ID: <?= $account->telegram_user_id ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <form action="<?= site_url('dashboard/remove_telegram/' . $account->id) ?>" method="POST"
+                                class="inline">
+                                <button type="submit" onclick="return confirm('Yakin ingin melepas akun Telegram ini?')"
+                                    class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
                         </div>
-                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="pt-2 border-t">
+                    <p class="text-sm text-slate-500 mb-3">
+                        <i class="fa-solid fa-plus-circle mr-1"></i>Tambah akun Telegram lain? Buka @incatat_bot dan kirim
+                        /start
+                    </p>
                 </div>
             <?php else: ?>
-                <div class="space-y-4">
+                <!-- Instructions to connect -->
+                <div class="space-y-3">
                     <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-xl">
-                        <span class="text-2xl">1️⃣</span>
+                        <span
+                            class="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
                         <div>
                             <div class="font-medium text-blue-800">Buka Telegram Bot</div>
                             <div class="text-sm text-blue-600">Cari dan buka @incatat_bot di Telegram</div>
@@ -108,7 +146,8 @@
                     </div>
 
                     <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-xl">
-                        <span class="text-2xl">2️⃣</span>
+                        <span
+                            class="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
                         <div>
                             <div class="font-medium text-blue-800">Kirim perintah /start</div>
                             <div class="text-sm text-blue-600">Bot akan meminta Anda untuk login</div>
@@ -116,12 +155,12 @@
                     </div>
 
                     <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-xl">
-                        <span class="text-2xl">3️⃣</span>
+                        <span
+                            class="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
                         <div>
                             <div class="font-medium text-blue-800">Masukkan email Anda</div>
-                            <div class="text-sm text-blue-600">Gunakan email: <strong>
-                                    <?= $user_detail->email ?>
-                                </strong></div>
+                            <div class="text-sm text-blue-600">Gunakan email: <strong><?= $user_detail->email ?></strong>
+                            </div>
                         </div>
                     </div>
                 </div>

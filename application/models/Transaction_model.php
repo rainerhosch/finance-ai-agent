@@ -105,6 +105,15 @@ class Transaction_model extends CI_Model
                 $tx->category_name = null;
                 $tx->category_icon = null;
             }
+
+            // Get all items for this transaction
+            $tx->items = $this->db->select('transaction_items.*, categories.name as category_name, categories.icon as category_icon')
+                ->from('transaction_items')
+                ->join('categories', 'categories.id = transaction_items.category_id', 'left')
+                ->where('transaction_items.transaction_id', $tx->id)
+                ->order_by('transaction_items.id', 'ASC')
+                ->get()
+                ->result();
         }
 
         return $transactions;

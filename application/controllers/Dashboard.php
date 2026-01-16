@@ -209,6 +209,10 @@ class Dashboard extends Auth_Controller
         // Check if user has password
         $this->data['has_password'] = $this->User_model->has_password($user['id']);
 
+        // Get telegram accounts
+        $this->load->model('Telegram_account_model');
+        $this->data['telegram_accounts'] = $this->Telegram_account_model->get_by_user($user['id']);
+
         $this->data['title'] = 'Pengaturan - incatat.id';
         $this->data['page'] = 'settings';
 
@@ -299,6 +303,31 @@ class Dashboard extends Auth_Controller
         $this->User_model->set_password($user['id'], $this->input->post('new_password'));
 
         $this->session->set_flashdata('success', 'Password berhasil disimpan! Sekarang Anda bisa login menggunakan email dan password.');
+        redirect('dashboard/settings');
+    }
+
+    /**
+     * Remove telegram account
+     */
+    public function remove_telegram($account_id)
+    {
+        $user = $this->get_user();
+
+        $this->load->model('Telegram_account_model');
+
+        // Find the account
+        $account = $this->Telegram_account_model->find($account_id);
+
+        if (!$account || $account->user_id != $user['id']) {
+            $this->session->set_flashdata('error', 'Akun Telegram tidak ditemukan.');
+            redirect('dashboard/settings');
+            return;
+        }
+
+        // Delete the account
+        $this->Telegram_account_model->delete($account_id);
+
+        $this->session->set_flashdata('success', 'Akun Telegram berhasil dilepas.');
         redirect('dashboard/settings');
     }
 }

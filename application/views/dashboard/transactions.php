@@ -58,40 +58,77 @@
     <?php if (!empty($transactions)): ?>
         <div class="divide-y">
             <?php foreach ($transactions as $tx): ?>
-                <div class="p-4 hover:bg-slate-50 transition flex items-center gap-4">
-                    <span class="text-3xl">
-                        <?php if ($tx->category_icon): ?>
-                            <i class="<?= $tx->category_icon ?>"></i>
-                        <?php else: ?>
-                            <i
-                                class="fa-solid <?= $tx->type == 'income' ? 'fa-arrow-down text-green-500' : 'fa-arrow-up text-red-500' ?>"></i>
-                        <?php endif; ?>
-                    </span>
-
-                    <div class="flex-1 min-w-0">
-                        <div class="font-medium text-slate-800">
-                            <?= $tx->description ?: $tx->category_name ?: ucfirst($tx->type) ?>
-                        </div>
-                        <div class="flex flex-wrap gap-2 mt-1">
-                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                                <?= date('d M Y', strtotime($tx->transaction_date)) ?>
-                            </span>
-                            <?php if ($tx->category_name): ?>
-                                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                                    <?= $tx->category_name ?>
-                                </span>
+                <div class="p-4 hover:bg-slate-50 transition">
+                    <div class="flex items-start gap-4">
+                        <span class="text-3xl mt-1">
+                            <?php if ($tx->category_icon): ?>
+                                <i class="<?= $tx->category_icon ?>"></i>
+                            <?php else: ?>
+                                <i
+                                    class="fa-solid <?= $tx->type == 'income' ? 'fa-arrow-down text-green-500' : 'fa-arrow-up text-red-500' ?>"></i>
                             <?php endif; ?>
-                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                                via
-                                <?= ucfirst($tx->source) ?>
-                            </span>
-                        </div>
-                    </div>
+                        </span>
 
-                    <div class="text-right">
-                        <div class="text-lg font-semibold <?= $tx->type == 'income' ? 'text-green-600' : 'text-red-600' ?>">
-                            <?= $tx->type == 'income' ? '+' : '-' ?> Rp
-                            <?= number_format($tx->amount, 0, ',', '.') ?>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <div class="font-medium text-slate-800">
+                                        <?php if (!empty($tx->store_name)): ?>
+                                            <?= htmlspecialchars($tx->store_name) ?>
+                                        <?php elseif (!empty($tx->description)): ?>
+                                            <?= htmlspecialchars($tx->description) ?>
+                                        <?php elseif (!empty($tx->category_name)): ?>
+                                            <?= $tx->category_name ?>
+                                        <?php else: ?>
+                                            <?= ucfirst($tx->type) ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="text-sm text-slate-500 mt-0.5">
+                                        <?= date('d M Y', strtotime($tx->transaction_date)) ?>
+                                        <?php if (!empty($tx->notes)): ?>
+                                            · <?= htmlspecialchars($tx->notes) ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div
+                                        class="text-lg font-semibold <?= $tx->type == 'income' ? 'text-green-600' : 'text-red-600' ?>">
+                                        <?= $tx->type == 'income' ? '+' : '-' ?> Rp
+                                        <?= number_format($tx->amount, 0, ',', '.') ?>
+                                    </div>
+                                    <div class="text-xs text-slate-400">
+                                        via <?= ucfirst($tx->source) ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Item Details -->
+                            <?php if (!empty($tx->items) && is_array($tx->items) && count($tx->items) > 0): ?>
+                                <div class="mt-2 bg-slate-50 rounded-lg p-2">
+                                    <div class="text-xs text-slate-500 mb-1">
+                                        <i class="fa-solid fa-list mr-1"></i><?= count($tx->items) ?> item
+                                    </div>
+                                    <div class="space-y-1">
+                                        <?php foreach (array_slice($tx->items, 0, 3) as $item): ?>
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-slate-600">
+                                                    <?= htmlspecialchars($item->name) ?>
+                                                    <?php if ($item->qty > 1): ?>
+                                                        <span class="text-slate-400">×<?= $item->qty ?></span>
+                                                    <?php endif; ?>
+                                                </span>
+                                                <span class="text-slate-700">Rp
+                                                    <?= number_format($item->subtotal, 0, ',', '.') ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                        <?php if (count($tx->items) > 3): ?>
+                                            <div class="text-xs text-slate-400">
+                                                +<?= count($tx->items) - 3 ?> item lainnya
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

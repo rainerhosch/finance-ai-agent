@@ -54,6 +54,11 @@ class Migrate extends CI_Controller
             $this->seed_categories();
             echo "✓ Default categories inserted\n\n";
 
+            // Create telegram_accounts table
+            echo "Creating telegram_accounts table...\n";
+            $this->create_telegram_accounts_table();
+            echo "✓ Telegram accounts table created\n\n";
+
             echo "=============================\n";
             echo "Migration completed successfully!\n";
             echo "=============================\n";
@@ -81,7 +86,7 @@ class Migrate extends CI_Controller
             // Disable foreign key checks
             $this->db->query('SET FOREIGN_KEY_CHECKS = 0');
 
-            $tables = array('transaction_items', 'transactions', 'categories', 'users', 'businesses');
+            $tables = array('telegram_accounts', 'transaction_items', 'transactions', 'categories', 'users', 'businesses');
             foreach ($tables as $table) {
                 $this->dbforge->drop_table($table, TRUE);
                 echo "  - Dropped $table\n";
@@ -245,5 +250,73 @@ class Migrate extends CI_Controller
         if ($this->db->count_all('categories') == 0) {
             $this->db->insert_batch('categories', $categories);
         }
+    }
+
+    /**
+     * Create telegram_accounts table
+     */
+    private function create_telegram_accounts_table()
+    {
+        // Drop if exists
+        $this->dbforge->drop_table('telegram_accounts', TRUE);
+
+        $this->dbforge->add_field(array(
+            'id' => array(
+                'type' => 'INT',
+                'constraint' => 11,
+                'unsigned' => TRUE,
+                'auto_increment' => TRUE
+            ),
+            'user_id' => array(
+                'type' => 'INT',
+                'constraint' => 11,
+                'unsigned' => TRUE,
+                'null' => FALSE
+            ),
+            'telegram_user_id' => array(
+                'type' => 'VARCHAR',
+                'constraint' => 50,
+                'null' => FALSE
+            ),
+            'telegram_username' => array(
+                'type' => 'VARCHAR',
+                'constraint' => 100,
+                'null' => TRUE
+            ),
+            'telegram_first_name' => array(
+                'type' => 'VARCHAR',
+                'constraint' => 100,
+                'null' => TRUE
+            ),
+            'label' => array(
+                'type' => 'VARCHAR',
+                'constraint' => 50,
+                'null' => TRUE
+            ),
+            'is_primary' => array(
+                'type' => 'TINYINT',
+                'constraint' => 1,
+                'default' => 0
+            ),
+            'verified_at' => array(
+                'type' => 'DATETIME',
+                'null' => TRUE
+            ),
+            'created_at' => array(
+                'type' => 'DATETIME',
+                'default' => date('Y-m-d H:i:s')
+            )
+        ));
+
+        $this->dbforge->add_key('id', TRUE);
+        $this->dbforge->add_key('user_id');
+        $this->dbforge->add_key('telegram_user_id');
+        $this->dbforge->create_table('telegram_accounts', TRUE);
+
+        // Add unique constraint
+        $this->db->query('CREATE UNIQUE INDEX uk_telegram_user_id ON telegram_accounts(telegram_user_id)');
+
+        // Add foreign key
+        $this->db->query('ALTER TABLE telegram_accounts ADD CONSTRAINT fk_telegram_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE');
     }
 }

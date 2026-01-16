@@ -62,7 +62,53 @@
             background: linear-gradient(90deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%);
             border-left-color: #0ea5e9;
         }
+
+        /* Skeleton Loading Animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 0.5rem;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-text {
+            height: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-text.sm {
+            height: 0.75rem;
+        }
+
+        .skeleton-text.lg {
+            height: 1.5rem;
+        }
+
+        .skeleton-circle {
+            border-radius: 50%;
+        }
+
+        .skeleton-card {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+        }
     </style>
+
+    <script>
+        function toggleSettingsDropdown() {
+            const submenu = document.getElementById('settings-submenu');
+            const arrow = document.getElementById('settings-arrow');
+            submenu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        }
+    </script>
 </head>
 
 <body class="bg-slate-100 antialiased overflow-x-hidden">
@@ -103,26 +149,41 @@
                         Transaksi
                     </a>
 
-                    <a href="<?= site_url('dashboard/profile') ?>"
-                        class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 border-l-4 border-transparent transition <?= (isset($page) && $page == 'profile') ? 'active font-semibold text-primary-600' : '' ?>">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        Profil
-                    </a>
-
-                    <a href="<?= site_url('dashboard/settings') ?>"
-                        class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 border-l-4 border-transparent transition <?= (isset($page) && $page == 'settings') ? 'active font-semibold text-primary-600' : '' ?>">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                            </path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Pengaturan
-                    </a>
+                    <!-- Pengaturan Dropdown -->
+                    <div class="settings-dropdown">
+                        <button type="button" onclick="toggleSettingsDropdown()"
+                            class="w-full sidebar-link flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 border-l-4 border-transparent transition <?= (isset($page) && in_array($page, ['settings', 'profile'])) ? 'active font-semibold text-primary-600' : '' ?>">
+                            <span class="flex items-center gap-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Pengaturan
+                            </span>
+                            <svg id="settings-arrow"
+                                class="w-4 h-4 transition-transform <?= (isset($page) && in_array($page, ['settings', 'profile'])) ? 'rotate-180' : '' ?>"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="settings-submenu"
+                            class="pl-8 space-y-1 mt-1 <?= (isset($page) && in_array($page, ['settings', 'profile'])) ? '' : 'hidden' ?>">
+                            <a href="<?= site_url('dashboard/profile') ?>"
+                                class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition <?= (isset($page) && $page == 'profile') ? 'bg-slate-50 font-medium text-primary-600' : '' ?>">
+                                <i class="fa-solid fa-user w-4"></i>
+                                Profil
+                            </a>
+                            <a href="<?= site_url('dashboard/settings') ?>"
+                                class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition <?= (isset($page) && $page == 'settings') ? 'bg-slate-50 font-medium text-primary-600' : '' ?>">
+                                <i class="fa-solid fa-building w-4"></i>
+                                Bisnis & Lainnya
+                            </a>
+                        </div>
+                    </div>
                 </nav>
 
                 <!-- User Info -->
