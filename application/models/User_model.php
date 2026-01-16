@@ -209,4 +209,115 @@ class User_model extends CI_Model
         ));
         return $this->find($user_id);
     }
+
+    /**
+     * Set password for user
+     */
+    public function set_password($user_id, $password)
+    {
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+
+        $this->db->where('id', $user_id);
+        $this->db->update($this->table, array(
+            'password' => $hashed,
+            'updated_at' => date('Y-m-d H:i:s')
+        ));
+
+        return true;
+    }
+
+    /**
+     * Verify password login
+     */
+    public function verify_password($email, $password)
+    {
+        $user = $this->find_by_email($email);
+
+        if (!$user || empty($user->password)) {
+            return false;
+        }
+
+        if (password_verify($password, $user->password)) {
+            return $user;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user has password set
+     */
+    public function has_password($user_id)
+    {
+        $user = $this->find($user_id);
+        return $user && !empty($user->password);
+    }
+
+    /**
+     * Download and save avatar locally
+     */
+    public function download_avatar($user_id, $google_avatar_url)
+    {
+        if (empty($google_avatar_url)) {
+            return null;
+        }
+
+        // Create uploads directory if not exists
+        $upload_dir = FCPATH . 'assets/uploads/avatars/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+
+        // Generate filename
+        $filename = 'avatar_' . $user_id . '_' . time() . '.jpg';
+        $filepath = $upload_dir . $filename;
+
+        // Download image from Google
+        $ch = curl_init($google_avatar_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        $image_data = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200 || empty($image_data)) {
+            log_message('error', 'Failed to download avatar from: ' . $google_avatar_url);
+            return null;
+        }
+
+        // Save to file
+        if (file_put_contents($filepath, $image_data) === false) {
+            log_message('error', 'Failed to save avatar to: ' . $filepath);
+            return null;
+        }
+
+        // Update user avatar path
+        $local_path = 'assets/uploads/avatars/' . $filename;
+        $this->db->where('id', $user_id);
+        $this->db->update($this->table, array(
+            'avatar' => $local_path,
+            'updated_at' => date('Y-m-d H:i:s')
+        ));
+
+        return $local_path;
+    }
+
+    /**
+     * Get avatar URL (with fallback)
+     */
+    public function get_avatar_url($user)
+    {
+        if (!empty($user->avatar)) {
+            // Check if it's a local path
+            if (strpos($user->avatar, 'http') === 0) {
+                return $user->avatar; // External URL
+            }
+            return base_url($user->avatar); // Local path
+        }
+        // Default avatar
+        return base_url('assets/img/default-avatar.png');
+    }
 }
+

@@ -54,9 +54,13 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 // Auth routes
-$route['login'] = 'auth/login';
-$route['logout'] = 'auth/logout';
 $route['auth/callback'] = 'auth/callback';
+$route['logout'] = 'auth/logout';
+
+// Login routes
+$route['login'] = 'auth/login_form';
+$route['login/password'] = 'auth/login_password';
+$route['login/google'] = 'auth/login';
 
 // Dashboard routes
 $route['dashboard'] = 'dashboard/index';
@@ -65,6 +69,7 @@ $route['dashboard/profile/update'] = 'dashboard/update_profile';
 $route['dashboard/transactions'] = 'dashboard/transactions';
 $route['dashboard/settings'] = 'dashboard/settings';
 $route['dashboard/settings/update-business'] = 'dashboard/update_business';
+$route['dashboard/set_password'] = 'dashboard/set_password';
 
 // API v1 routes - User
 $route['api/v1/user/verify'] = 'api/v1/user/verify';

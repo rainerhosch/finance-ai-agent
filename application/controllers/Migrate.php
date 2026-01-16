@@ -124,6 +124,7 @@ class Migrate extends CI_Controller
             'business_id' => array('type' => 'INT', 'constraint' => 11, 'unsigned' => TRUE, 'null' => TRUE),
             'google_id' => array('type' => 'VARCHAR', 'constraint' => 255, 'null' => TRUE),
             'email' => array('type' => 'VARCHAR', 'constraint' => 255, 'null' => FALSE),
+            'password' => array('type' => 'VARCHAR', 'constraint' => 255, 'null' => TRUE),
             'name' => array('type' => 'VARCHAR', 'constraint' => 255, 'null' => TRUE),
             'avatar' => array('type' => 'VARCHAR', 'constraint' => 500, 'null' => TRUE),
             'phone' => array('type' => 'VARCHAR', 'constraint' => 20, 'null' => TRUE),

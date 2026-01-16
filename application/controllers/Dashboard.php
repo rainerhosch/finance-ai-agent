@@ -167,6 +167,9 @@ class Dashboard extends Auth_Controller
             $this->data['business'] = $this->Business_model->find($this->data['user_detail']->business_id);
         }
 
+        // Check if user has password
+        $this->data['has_password'] = $this->User_model->has_password($user['id']);
+
         $this->data['title'] = 'Pengaturan - incatat.id';
         $this->data['page'] = 'settings';
 
@@ -217,6 +220,46 @@ class Dashboard extends Auth_Controller
         ));
 
         $this->session->set_flashdata('success', 'Info bisnis berhasil diperbarui!');
+        redirect('dashboard/settings');
+    }
+
+    /**
+     * Set or change password
+     */
+    public function set_password()
+    {
+        $user = $this->get_user();
+        $has_password = $this->User_model->has_password($user['id']);
+
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('new_password', 'Password Baru', 'required|min_length[6]');
+        $this->form_validation->set_rules('confirm_password', 'Konfirmasi Password', 'required|matches[new_password]');
+
+        // If user has password, require current password
+        if ($has_password) {
+            $this->form_validation->set_rules('current_password', 'Password Lama', 'required');
+        }
+
+        if ($this->form_validation->run() === FALSE) {
+            $this->session->set_flashdata('error', validation_errors());
+            redirect('dashboard/settings');
+            return;
+        }
+
+        // Verify current password if changing
+        if ($has_password) {
+            $user_detail = $this->User_model->find($user['id']);
+            if (!password_verify($this->input->post('current_password'), $user_detail->password)) {
+                $this->session->set_flashdata('error', 'Password lama salah.');
+                redirect('dashboard/settings');
+                return;
+            }
+        }
+
+        // Set new password
+        $this->User_model->set_password($user['id'], $this->input->post('new_password'));
+
+        $this->session->set_flashdata('success', 'Password berhasil disimpan! Sekarang Anda bisa login menggunakan email dan password.');
         redirect('dashboard/settings');
     }
 }
