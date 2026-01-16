@@ -96,3 +96,9 @@ $route['api/v1/transactions'] = 'api/v1/transaction/index';
 $route['api/v1/transactions/create'] = 'api/v1/transaction/create';
 $route['api/v1/summary'] = 'api/v1/transaction/summary';
 $route['api/v1/categories'] = 'api/v1/masterdata/categories';
+
+// API v1 routes - AI Usage
+$route['api/v1/ai/check-limit'] = 'api/v1/aiusage/check_limit';
+$route['api/v1/ai/counter'] = 'api/v1/aiusage/counter';
+$route['api/v1/ai/status'] = 'api/v1/aiusage/status';
+$route['api/v1/ai/history'] = 'api/v1/aiusage/history';

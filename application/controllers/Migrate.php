@@ -59,6 +59,11 @@ class Migrate extends CI_Controller
             $this->create_telegram_accounts_table();
             echo "✓ Telegram accounts table created\n\n";
 
+            // Create ai_server_status table
+            echo "Creating ai_server_status table...\n";
+            $this->create_ai_server_status_table();
+            echo "✓ AI server status table created\n\n";
+
             echo "=============================\n";
             echo "Migration completed successfully!\n";
             echo "=============================\n";
@@ -86,7 +91,7 @@ class Migrate extends CI_Controller
             // Disable foreign key checks
             $this->db->query('SET FOREIGN_KEY_CHECKS = 0');
 
-            $tables = array('telegram_accounts', 'transaction_items', 'transactions', 'categories', 'users', 'businesses');
+            $tables = array('ai_server_status', 'telegram_accounts', 'transaction_items', 'transactions', 'categories', 'users', 'businesses');
             foreach ($tables as $table) {
                 $this->dbforge->drop_table($table, TRUE);
                 echo "  - Dropped $table\n";
@@ -318,5 +323,104 @@ class Migrate extends CI_Controller
 
         // Add foreign key
         $this->db->query('ALTER TABLE telegram_accounts ADD CONSTRAINT fk_telegram_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE');
+    }
+
+    /**
+     * Create ai_server_status table for tracking AI usage limits
+     */
+    private function create_ai_server_status_table()
+    {
+        // Drop if exists
+        $this->dbforge->drop_table('ai_server_status', TRUE);
+
+        $this->dbforge->add_field(array(
+            'id' => array(
+                'type' => 'INT',
+                'constraint' => 11,
+                'unsigned' => TRUE,
+                'auto_increment' => TRUE
+            ),
+            'server_name' => array(
+                'type' => 'VARCHAR',
+                'constraint' => 50,
+                'null' => FALSE,
+                'default' => 'default'
+            ),
+            'usage_date' => array(
+                'type' => 'DATE',
+                'null' => FALSE
+            ),
+            'request_count' => array(
+                'type' => 'INT',
+                'default' => 0
+            ),
+            'request_count_minute' => array(
+                'type' => 'INT',
+                'default' => 0
+            ),
+            'token_count_minute' => array(
+                'type' => 'INT',
+                'default' => 0
+            ),
+            'last_minute_reset' => array(
+                'type' => 'DATETIME',
+                'null' => TRUE
+            ),
+            'rpm_limit' => array(
+                'type' => 'INT',
+                'default' => 5
+            ),
+            'rpd_limit' => array(
+                'type' => 'INT',
+                'default' => 20
+            ),
+            'tpm_limit' => array(
+                'type' => 'INT',
+                'default' => 250000
+            ),
+            'is_active' => array(
+                'type' => 'TINYINT',
+                'constraint' => 1,
+                'default' => 1
+            ),
+            'created_at' => array(
+                'type' => 'DATETIME',
+                'null' => TRUE
+            ),
+            'updated_at' => array(
+                'type' => 'DATETIME',
+                'null' => TRUE
+            )
+        ));
+
+        $this->dbforge->add_key('id', TRUE);
+        $this->dbforge->create_table('ai_server_status', TRUE);
+
+        // Add unique constraint for server_name + usage_date
+        $this->db->query('CREATE UNIQUE INDEX uk_server_date ON ai_server_status(server_name, usage_date)');
+        $this->db->query('CREATE INDEX idx_usage_date ON ai_server_status(usage_date)');
+    }
+
+    /**
+     * Run only AI server status migration
+     * Access via: /migrate/ai_server_status
+     */
+    public function ai_server_status()
+    {
+        $this->load->dbforge();
+
+        echo "<h1>AI Server Status Migration</h1>";
+        echo "<pre>";
+
+        try {
+            echo "Creating ai_server_status table...\n";
+            $this->create_ai_server_status_table();
+            echo "✓ AI server status table created\n\n";
+            echo "Migration completed successfully!\n";
+        } catch (Exception $e) {
+            echo "Error: " . $e->getMessage() . "\n";
+        }
+
+        echo "</pre>";
     }
 }
