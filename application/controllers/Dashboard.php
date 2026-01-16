@@ -111,7 +111,7 @@ class Dashboard extends Auth_Controller
     }
 
     /**
-     * Add transaction (AJAX)
+     * Add transaction (AJAX) - supports multiple items
      */
     public function add_transaction()
     {
@@ -120,7 +120,6 @@ class Dashboard extends Auth_Controller
         $this->load->library('form_validation');
 
         $this->form_validation->set_rules('type', 'Tipe', 'required|in_list[income,expense]');
-        $this->form_validation->set_rules('amount', 'Jumlah', 'required|numeric|greater_than[0]');
         $this->form_validation->set_rules('transaction_date', 'Tanggal', 'required');
 
         if ($this->form_validation->run() === FALSE) {
@@ -131,17 +130,57 @@ class Dashboard extends Auth_Controller
             return;
         }
 
+        // Get items from form
+        $items = $this->input->post('items');
+
+        if (empty($items) || !is_array($items)) {
+            $this->output
+                ->set_status_header(400)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('error' => 'Minimal harus ada 1 item')));
+            return;
+        }
+
+        // Format items array
+        $formatted_items = array();
+        foreach ($items as $item) {
+            if (!empty($item['name']) && !empty($item['price'])) {
+                $formatted_items[] = array(
+                    'name' => $item['name'],
+                    'category_id' => !empty($item['category_id']) ? $item['category_id'] : null,
+                    'qty' => !empty($item['qty']) ? (int) $item['qty'] : 1,
+                    'price' => (float) $item['price']
+                );
+            }
+        }
+
+        if (empty($formatted_items)) {
+            $this->output
+                ->set_status_header(400)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('error' => 'Item tidak valid')));
+            return;
+        }
+
         $transaction_data = array(
             'user_id' => $user['id'],
-            'category_id' => $this->input->post('category_id'),
             'type' => $this->input->post('type'),
-            'amount' => $this->input->post('amount'),
-            'description' => $this->input->post('description'),
             'transaction_date' => $this->input->post('transaction_date'),
-            'source' => 'web'
+            'store_name' => $this->input->post('store_name'),
+            'notes' => $this->input->post('notes'),
+            'source' => 'web',
+            'items' => $formatted_items
         );
 
         $transaction_id = $this->Transaction_model->create($transaction_data);
+
+        if (!$transaction_id) {
+            $this->output
+                ->set_status_header(500)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('error' => 'Gagal menyimpan transaksi')));
+            return;
+        }
 
         $this->output
             ->set_content_type('application/json')
