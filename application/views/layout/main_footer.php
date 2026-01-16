@@ -6,7 +6,7 @@
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center space-x-2 mb-4">
                     <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
-                        <span class="text-white text-xl">💰</span>
+                        <i class="fa-solid fa-wallet text-white text-lg"></i>
                     </div>
                     <span class="text-2xl font-bold">incatat.id</span>
                 </div>
@@ -30,8 +30,8 @@
             <div>
                 <h4 class="font-semibold mb-4">Hubungi Kami</h4>
                 <ul class="space-y-2 text-slate-400">
-                    <li>📧 support@incatat.id</li>
-                    <li>💬 @incatat_bot</li>
+                    <li><i class="fa-solid fa-envelope mr-2"></i>support@incatat.id</li>
+                    <li><i class="fa-brands fa-telegram mr-2"></i>@incatat_bot</li>
                 </ul>
             </div>
         </div>

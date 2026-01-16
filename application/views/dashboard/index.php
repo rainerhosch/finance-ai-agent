@@ -6,8 +6,8 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
         <div class="flex items-center justify-between mb-4">
             <span class="text-slate-500 text-sm">Saldo Bulan Ini</span>
-            <span
-                class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center">💰</span>
+            <span class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center"><i
+                    class="fa-solid fa-wallet"></i></span>
         </div>
         <div class="text-2xl font-bold <?= $summary['balance'] >= 0 ? 'text-green-600' : 'text-red-600' ?>">
             Rp
@@ -25,7 +25,8 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
         <div class="flex items-center justify-between mb-4">
             <span class="text-slate-500 text-sm">Pemasukan</span>
-            <span class="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">📥</span>
+            <span class="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center"><i
+                    class="fa-solid fa-arrow-down"></i></span>
         </div>
         <div class="text-2xl font-bold text-slate-800">
             Rp
@@ -40,7 +41,8 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
         <div class="flex items-center justify-between mb-4">
             <span class="text-slate-500 text-sm">Pengeluaran</span>
-            <span class="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center">📤</span>
+            <span class="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center"><i
+                    class="fa-solid fa-arrow-up"></i></span>
         </div>
         <div class="text-2xl font-bold text-slate-800">
             Rp
@@ -117,7 +119,12 @@
             <?php foreach ($recent_transactions as $tx): ?>
                 <div class="py-4 flex items-center gap-4">
                     <span class="text-2xl">
-                        <?= $tx->category_icon ?: ($tx->type == 'income' ? '📥' : '📤') ?>
+                        <?php if ($tx->category_icon): ?>
+                            <i class="<?= $tx->category_icon ?>"></i>
+                        <?php else: ?>
+                            <i
+                                class="fa-solid <?= $tx->type == 'income' ? 'fa-arrow-down text-green-500' : 'fa-arrow-up text-red-500' ?>"></i>
+                        <?php endif; ?>
                     </span>
                     <div class="flex-1 min-w-0">
                         <div class="font-medium text-slate-800">

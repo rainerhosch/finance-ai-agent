@@ -7,7 +7,7 @@
             <!-- Logo -->
             <div class="flex items-center space-x-2">
                 <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg">
-                    <span class="text-white text-xl">💰</span>
+                    <i class="fa-solid fa-wallet text-white text-lg"></i>
                 </div>
                 <span class="text-2xl font-bold gradient-text">incatat.id</span>
             </div>
@@ -75,7 +75,7 @@
             <div class="text-center lg:text-left">
                 <div
                     class="inline-flex items-center px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-medium mb-6">
-                    <span class="mr-2">🚀</span> Powered by AI & Telegram Bot
+                    <i class="fa-solid fa-rocket mr-2"></i> Powered by AI & Telegram Bot
                 </div>
 
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
@@ -146,7 +146,7 @@
                         <!-- Chat Header -->
                         <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200">
                             <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
-                                <span class="text-white">🤖</span>
+                                <i class="fa-solid fa-robot text-white"></i>
                             </div>
                             <div>
                                 <div class="font-semibold">incatat Bot</div>
@@ -157,7 +157,7 @@
                         <!-- Chat Messages -->
                         <div class="space-y-3 text-sm">
                             <div class="bg-primary-100 text-primary-800 p-3 rounded-2xl rounded-tl-none max-w-[80%]">
-                                Halo! Apa yang ingin kamu catat hari ini? 💰
+                                Halo! Apa yang ingin kamu catat hari ini?
                             </div>
                             <div class="bg-white p-3 rounded-2xl rounded-tr-none max-w-[80%] ml-auto shadow-sm">
                                 Baru beli makan siang 35rb
@@ -167,10 +167,10 @@
                             </div>
                             <div
                                 class="bg-white p-3 rounded-2xl rounded-tr-none max-w-[80%] ml-auto shadow-sm flex items-center gap-2">
-                                <span>📷</span> Struk belanja.jpg
+                                <i class="fa-solid fa-camera"></i> Struk belanja.jpg
                             </div>
                             <div class="bg-primary-100 text-primary-800 p-3 rounded-2xl rounded-tl-none max-w-[80%]">
-                                🔍 Menganalisis struk...<br>
+                                <i class="fa-solid fa-magnifying-glass"></i> Menganalisis struk...<br>
                                 ✅ Ditemukan 5 item, total Rp 287.500
                             </div>
                         </div>
@@ -205,8 +205,8 @@
             <!-- Feature 1 -->
             <div
                 class="feature-card bg-gradient-to-br from-primary-50 to-white p-8 rounded-3xl border border-primary-100">
-                <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg">
-                    💬
+                <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <i class="fa-solid fa-comments text-white text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">Chat untuk Catat</h3>
                 <p class="text-slate-600">
@@ -219,8 +219,8 @@
             <div
                 class="feature-card bg-gradient-to-br from-accent-50 to-white p-8 rounded-3xl border border-accent-100">
                 <div
-                    class="w-14 h-14 bg-gradient-to-r from-accent-500 to-pink-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg">
-                    📷
+                    class="w-14 h-14 bg-gradient-to-r from-accent-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <i class="fa-solid fa-camera text-white text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">Scan Struk Otomatis</h3>
                 <p class="text-slate-600">
@@ -231,8 +231,8 @@
             <!-- Feature 3 -->
             <div class="feature-card bg-gradient-to-br from-green-50 to-white p-8 rounded-3xl border border-green-100">
                 <div
-                    class="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg">
-                    📊
+                    class="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <i class="fa-solid fa-chart-pie text-white text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">Laporan Visual</h3>
                 <p class="text-slate-600">
@@ -243,8 +243,8 @@
             <!-- Feature 4 -->
             <div class="feature-card bg-gradient-to-br from-blue-50 to-white p-8 rounded-3xl border border-blue-100">
                 <div
-                    class="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg">
-                    🤖
+                    class="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <i class="fa-brands fa-telegram text-white text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">Telegram Bot</h3>
                 <p class="text-slate-600">
@@ -256,8 +256,8 @@
             <div
                 class="feature-card bg-gradient-to-br from-orange-50 to-white p-8 rounded-3xl border border-orange-100">
                 <div
-                    class="w-14 h-14 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg">
-                    🎯
+                    class="w-14 h-14 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <i class="fa-solid fa-bullseye text-white text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">Kategorisasi Cerdas</h3>
                 <p class="text-slate-600">
@@ -269,8 +269,8 @@
             <div
                 class="feature-card bg-gradient-to-br from-purple-50 to-white p-8 rounded-3xl border border-purple-100">
                 <div
-                    class="w-14 h-14 bg-gradient-to-r from-purple-500 to-violet-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg">
-                    🔒
+                    class="w-14 h-14 bg-gradient-to-r from-purple-500 to-violet-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <i class="fa-solid fa-lock text-white text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">Aman & Privat</h3>
                 <p class="text-slate-600">

@@ -7,6 +7,8 @@
     <title>
         <?= isset($title) ? $title : 'Dashboard - incatat.id' ?>
     </title>
+    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon/logo.png') ?>" type="image/png">
+    <link rel="icon" href="<?= base_url('assets/img/favicon/logo.png') ?>" type="image/png">
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -41,6 +43,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="<?= base_url('assets/fontawesome-free-7.1.0-web/css/all.min.css') ?>">
+
     <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -70,7 +75,7 @@
                 <div class="p-6 border-b">
                     <a href="<?= site_url('dashboard') ?>" class="flex items-center space-x-2">
                         <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg">
-                            <span class="text-white text-xl">💰</span>
+                            <i class="fa-solid fa-wallet text-white text-lg"></i>
                         </div>
                         <span class="text-xl font-bold text-slate-800">incatat.id</span>
                     </a>

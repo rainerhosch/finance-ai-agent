@@ -9,7 +9,8 @@
     <title>
         <?= isset($title) ? $title : 'incatat.id' ?>
     </title>
-    <link rel="shortcut icon" href="<?= base_url() ?>assets/img/favicon/logo.png" type="text/css">
+    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon/logo.png') ?>" type="image/png">
+    <link rel="icon" href="<?= base_url('assets/img/favicon/logo.png') ?>" type="image/png">
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -55,7 +56,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-
+    <link rel="stylesheet" href="<?= base_url('assets/fontawesome-free-7.1.0-web/css/all.min.css') ?>">
+    <script src="<?= base_url('assets/fontawesome-free-7.1.0-web/js/all.min.js') ?>"></script>
     <!-- Custom Styles -->
     <style>
         * {

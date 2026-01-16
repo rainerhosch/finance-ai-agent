@@ -25,7 +25,7 @@
                         <input type="radio" name="type" value="expense" class="peer hidden" checked>
                         <div
                             class="p-4 border-2 rounded-xl cursor-pointer text-center peer-checked:border-red-500 peer-checked:bg-red-50 transition">
-                            <span class="text-2xl">📤</span>
+                            <i class="fa-solid fa-arrow-up text-2xl text-red-500"></i>
                             <div class="font-medium mt-1">Pengeluaran</div>
                         </div>
                     </label>
@@ -33,7 +33,7 @@
                         <input type="radio" name="type" value="income" class="peer hidden">
                         <div
                             class="p-4 border-2 rounded-xl cursor-pointer text-center peer-checked:border-green-500 peer-checked:bg-green-50 transition">
-                            <span class="text-2xl">📥</span>
+                            <i class="fa-solid fa-arrow-down text-2xl text-green-500"></i>
                             <div class="font-medium mt-1">Pemasukan</div>
                         </div>
                     </label>
@@ -59,9 +59,11 @@
                         <?php if (isset($categories) && !empty($categories)): ?>
                             <?php
                             $expense_cats = array_filter($categories, function ($c) {
-                                return $c->type == 'expense'; });
+                                return $c->type == 'expense';
+                            });
                             $income_cats = array_filter($categories, function ($c) {
-                                return $c->type == 'income'; });
+                                return $c->type == 'income';
+                            });
                             ?>
                             <?php if (!empty($expense_cats)): ?>
                                 <optgroup label="Pengeluaran">

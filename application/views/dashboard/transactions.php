@@ -60,7 +60,12 @@
             <?php foreach ($transactions as $tx): ?>
                 <div class="p-4 hover:bg-slate-50 transition flex items-center gap-4">
                     <span class="text-3xl">
-                        <?= $tx->category_icon ?: ($tx->type == 'income' ? '📥' : '📤') ?>
+                        <?php if ($tx->category_icon): ?>
+                            <i class="<?= $tx->category_icon ?>"></i>
+                        <?php else: ?>
+                            <i
+                                class="fa-solid <?= $tx->type == 'income' ? 'fa-arrow-down text-green-500' : 'fa-arrow-up text-red-500' ?>"></i>
+                        <?php endif; ?>
                     </span>
 
                     <div class="flex-1 min-w-0">

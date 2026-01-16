@@ -223,21 +223,21 @@ class Migrate extends CI_Controller
     private function seed_categories()
     {
         $categories = array(
-            // Income
-            array('name' => 'Gaji', 'type' => 'income', 'icon' => '💰', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Bonus', 'type' => 'income', 'icon' => '🎁', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Investasi', 'type' => 'income', 'icon' => '📈', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Penjualan', 'type' => 'income', 'icon' => '🛒', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Lainnya', 'type' => 'income', 'icon' => '📥', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            // Expense
-            array('name' => 'Makanan & Minuman', 'type' => 'expense', 'icon' => '🍔', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Transportasi', 'type' => 'expense', 'icon' => '🚗', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Belanja', 'type' => 'expense', 'icon' => '🛍️', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Tagihan', 'type' => 'expense', 'icon' => '📄', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Hiburan', 'type' => 'expense', 'icon' => '🎮', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Kesehatan', 'type' => 'expense', 'icon' => '💊', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Pendidikan', 'type' => 'expense', 'icon' => '📚', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
-            array('name' => 'Lainnya', 'type' => 'expense', 'icon' => '📤', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            // Income - using Font Awesome classes
+            array('name' => 'Gaji', 'type' => 'income', 'icon' => 'fa-solid fa-money-bill-wave text-green-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Bonus', 'type' => 'income', 'icon' => 'fa-solid fa-gift text-purple-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Investasi', 'type' => 'income', 'icon' => 'fa-solid fa-chart-line text-blue-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Penjualan', 'type' => 'income', 'icon' => 'fa-solid fa-cart-shopping text-orange-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Lainnya', 'type' => 'income', 'icon' => 'fa-solid fa-arrow-down text-green-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            // Expense - using Font Awesome classes
+            array('name' => 'Makanan & Minuman', 'type' => 'expense', 'icon' => 'fa-solid fa-utensils text-red-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Transportasi', 'type' => 'expense', 'icon' => 'fa-solid fa-car text-blue-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Belanja', 'type' => 'expense', 'icon' => 'fa-solid fa-bag-shopping text-pink-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Tagihan', 'type' => 'expense', 'icon' => 'fa-solid fa-file-invoice text-yellow-600', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Hiburan', 'type' => 'expense', 'icon' => 'fa-solid fa-gamepad text-purple-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Kesehatan', 'type' => 'expense', 'icon' => 'fa-solid fa-pills text-red-400', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Pendidikan', 'type' => 'expense', 'icon' => 'fa-solid fa-book text-blue-600', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
+            array('name' => 'Lainnya', 'type' => 'expense', 'icon' => 'fa-solid fa-arrow-up text-red-500', 'is_default' => 1, 'created_at' => date('Y-m-d H:i:s')),
         );
 
         // Only insert if categories table is empty
