@@ -141,7 +141,8 @@
                             class="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
                         <div>
                             <div class="font-medium text-blue-800">Buka Telegram Bot</div>
-                            <div class="text-sm text-blue-600">Cari dan buka @incatat_bot di Telegram</div>
+                            <div class="text-sm text-blue-600">Klik disini <i class="fa-brands fa-telegram mr-1"></i><a
+                                    href="https://t.me/incatatbot" target="_blank">incatatbot</a></div>
                         </div>
                     </div>
 
@@ -166,57 +167,6 @@
                 </div>
             <?php endif; ?>
         </div>
-    </div>
-
-    <!-- Password Section -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="p-6 border-b">
-            <h3 class="text-lg font-semibold text-slate-800">
-                <i class="fa-solid fa-lock mr-2"></i>Password
-            </h3>
-            <p class="text-slate-500 text-sm mt-1">
-                <?php if (isset($has_password) && $has_password): ?>
-                    Ubah password untuk login dengan email dan password
-                <?php else: ?>
-                    Tambahkan password untuk bisa login tanpa Google
-                <?php endif; ?>
-            </p>
-        </div>
-
-        <form action="<?= site_url('dashboard/set_password') ?>" method="POST" class="p-6 space-y-4">
-            <?php if (isset($has_password) && $has_password): ?>
-                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-xl text-green-700 text-sm">
-                    <i class="fa-solid fa-check-circle"></i>
-                    <span>Password sudah diatur. Anda bisa login menggunakan email dan password.</span>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Password Lama</label>
-                    <input type="password" name="current_password" required
-                        class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-                        placeholder="Masukkan password lama">
-                </div>
-            <?php endif; ?>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Password Baru</label>
-                <input type="password" name="new_password" required minlength="6"
-                    class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-                    placeholder="Minimal 6 karakter">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Konfirmasi Password</label>
-                <input type="password" name="confirm_password" required minlength="6"
-                    class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-                    placeholder="Ulangi password baru">
-            </div>
-
-            <button type="submit"
-                class="px-6 py-2.5 gradient-bg text-white rounded-xl font-medium hover:opacity-90 transition">
-                <i class="fa-solid fa-save mr-2"></i>
-                <?= (isset($has_password) && $has_password) ? 'Ubah Password' : 'Simpan Password' ?>
-            </button>
-        </form>
     </div>
 
     <!-- Danger Zone -->

@@ -40,6 +40,8 @@ class Dashboard extends Auth_Controller
     {
         $user = $this->get_user();
         $this->data['user_detail'] = $this->User_model->find($user['id']);
+        // Check if user has password
+        $this->data['has_password'] = $this->User_model->has_password($user['id']);
         $this->data['title'] = 'Profil - incatat.id';
         $this->data['page'] = 'profile';
 
@@ -206,9 +208,6 @@ class Dashboard extends Auth_Controller
             $this->data['business'] = $this->Business_model->find($this->data['user_detail']->business_id);
         }
 
-        // Check if user has password
-        $this->data['has_password'] = $this->User_model->has_password($user['id']);
-
         // Get telegram accounts
         $this->load->model('Telegram_account_model');
         $this->data['telegram_accounts'] = $this->Telegram_account_model->get_by_user($user['id']);
@@ -285,7 +284,7 @@ class Dashboard extends Auth_Controller
 
         if ($this->form_validation->run() === FALSE) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect('dashboard/settings');
+            redirect('dashboard/profile');
             return;
         }
 
@@ -294,7 +293,7 @@ class Dashboard extends Auth_Controller
             $user_detail = $this->User_model->find($user['id']);
             if (!password_verify($this->input->post('current_password'), $user_detail->password)) {
                 $this->session->set_flashdata('error', 'Password lama salah.');
-                redirect('dashboard/settings');
+                redirect('dashboard/profile');
                 return;
             }
         }
@@ -303,7 +302,7 @@ class Dashboard extends Auth_Controller
         $this->User_model->set_password($user['id'], $this->input->post('new_password'));
 
         $this->session->set_flashdata('success', 'Password berhasil disimpan! Sekarang Anda bisa login menggunakan email dan password.');
-        redirect('dashboard/settings');
+        redirect('dashboard/profile');
     }
 
     /**
