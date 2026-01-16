@@ -104,7 +104,8 @@ class Ai_server_status_model extends CI_Model
 
         $new_request_count = $record->request_count + 1;
         $new_request_count_minute = $record->request_count_minute + 1;
-        $new_token_count_minute = $record->token_count_minute + $tokens_used;
+        $new_token_count_minute = $tokens_used;
+        // $new_token_count_minute = $record->token_count_minute + $tokens_used;
 
         $this->db->where('id', $record->id)
             ->update($this->table, array(
