@@ -39,6 +39,7 @@ class Transaction_model extends CI_Model
 
     /**
      * Get transactions by business with optional filters
+     * Includes computed fields for view compatibility
      */
     public function get_by_business($business_id, $filters = array())
     {
@@ -76,7 +77,37 @@ class Transaction_model extends CI_Model
             $this->db->limit($filters['limit'], $offset);
         }
 
-        return $this->db->get()->result();
+        $transactions = $this->db->get()->result();
+
+        // Add computed fields for backward compatibility
+        foreach ($transactions as &$tx) {
+            // Map new fields to old field names for view compatibility
+            $tx->amount = $tx->total_amount;
+            $tx->description = $tx->notes ?: $tx->store_name;
+
+            // Get first item's category info
+            $first_item = $this->db->select('transaction_items.*, categories.name as cat_name, categories.icon as cat_icon')
+                ->from('transaction_items')
+                ->join('categories', 'categories.id = transaction_items.category_id', 'left')
+                ->where('transaction_items.transaction_id', $tx->id)
+                ->order_by('transaction_items.id', 'ASC')
+                ->limit(1)
+                ->get()
+                ->row();
+
+            if ($first_item) {
+                $tx->category_name = $first_item->cat_name;
+                $tx->category_icon = $first_item->cat_icon;
+                if (!$tx->description) {
+                    $tx->description = $first_item->name;
+                }
+            } else {
+                $tx->category_name = null;
+                $tx->category_icon = null;
+            }
+        }
+
+        return $transactions;
     }
 
     /**
