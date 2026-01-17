@@ -84,7 +84,7 @@
                 <?php foreach ($top_expenses as $expense): ?>
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">
-                            <?= `<i class="{$expense->icon}"></i>` ?: '📌' ?>
+                            <?= $expense->icon ? "<i class='{$expense->icon}'></i>" : '📌' ?>
                         </span>
                         <div class="flex-1">
                             <div class="font-medium text-slate-800">
