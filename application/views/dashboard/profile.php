@@ -1,5 +1,3 @@
-<?php $this->load->view('layout/dashboard_header'); ?>
-
 <div class="max-w-2xl mx-auto">
     <!-- Profile Completion Alert -->
     <?php if (!$user_detail->profile_completed): ?>
@@ -156,5 +154,3 @@
         </div>
     </div>
 </div>
-
-<?php $this->load->view('layout/dashboard_footer'); ?>

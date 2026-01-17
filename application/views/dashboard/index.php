@@ -1,5 +1,3 @@
-<?php $this->load->view('layout/dashboard_header'); ?>
-
 <!-- Summary Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-8">
     <!-- Income -->
@@ -237,5 +235,3 @@
         }
     });
 </script>
-
-<?php $this->load->view('layout/dashboard_footer'); ?>

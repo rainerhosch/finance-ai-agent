@@ -260,6 +260,268 @@
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeAddModal();
     });
+
+    // ========================================
+    // AJAX Navigation System with Skeleton Loading
+    // ========================================
+
+    const PageNavigator = {
+        pageContent: document.getElementById('page-content'),
+        pageLoader: document.getElementById('page-loader'),
+        currentUrl: window.location.href,
+
+        // Skeleton templates
+        skeletons: {
+            dashboard: `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-8">
+                    ${Array(4).fill(`
+                        <div class="skeleton-card">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="skeleton skeleton-text sm" style="width: 60%"></div>
+                                <div class="skeleton skeleton-icon"></div>
+                            </div>
+                            <div class="skeleton skeleton-text xl" style="width: 80%"></div>
+                            <div class="skeleton skeleton-text sm" style="width: 40%; margin-top: 0.5rem"></div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-6 mb-8">
+                    <div class="lg:col-span-2 skeleton-card">
+                        <div class="skeleton skeleton-text lg" style="width: 40%; margin-bottom: 1.5rem"></div>
+                        <div class="skeleton skeleton-chart"></div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton skeleton-text lg" style="width: 50%; margin-bottom: 1.5rem"></div>
+                        ${Array(5).fill(`
+                            <div class="skeleton-row">
+                                <div class="skeleton skeleton-icon"></div>
+                                <div style="flex: 1">
+                                    <div class="skeleton skeleton-text" style="width: 70%"></div>
+                                    <div class="skeleton skeleton-text sm" style="width: 40%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="skeleton skeleton-text lg" style="width: 30%"></div>
+                        <div class="skeleton skeleton-text sm" style="width: 15%"></div>
+                    </div>
+                    ${Array(5).fill(`
+                        <div class="skeleton-row border-b border-slate-100 py-4">
+                            <div class="skeleton skeleton-icon"></div>
+                            <div style="flex: 1">
+                                <div class="skeleton skeleton-text" style="width: 50%"></div>
+                                <div class="skeleton skeleton-text sm" style="width: 30%"></div>
+                            </div>
+                            <div style="text-align: right">
+                                <div class="skeleton skeleton-text" style="width: 100px; margin-left: auto"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `,
+            transactions: `
+                <div class="skeleton-card mb-6">
+                    <div class="flex flex-wrap gap-4">
+                        ${Array(4).fill(`
+                            <div style="flex: 1; min-width: 150px">
+                                <div class="skeleton skeleton-text sm" style="width: 40%; margin-bottom: 0.5rem"></div>
+                                <div class="skeleton" style="height: 42px; width: 100%"></div>
+                            </div>
+                        `).join('')}
+                        <div style="display: flex; gap: 0.5rem; align-items: flex-end">
+                            <div class="skeleton" style="height: 42px; width: 80px"></div>
+                            <div class="skeleton" style="height: 42px; width: 60px"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    ${Array(8).fill(`
+                        <div class="skeleton-row border-b border-slate-100 py-4">
+                            <div class="skeleton skeleton-icon" style="width: 2.5rem; height: 2.5rem"></div>
+                            <div style="flex: 1">
+                                <div class="skeleton skeleton-text" style="width: 40%"></div>
+                                <div class="skeleton skeleton-text sm" style="width: 25%"></div>
+                            </div>
+                            <div style="text-align: right">
+                                <div class="skeleton skeleton-text" style="width: 100px; margin-left: auto"></div>
+                                <div class="skeleton skeleton-text sm" style="width: 60px; margin-left: auto; margin-top: 0.25rem"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `,
+            default: `
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-text lg" style="width: 40%; margin-bottom: 2rem"></div>
+                    ${Array(6).fill(`
+                        <div class="skeleton skeleton-text" style="width: 100%; margin-bottom: 1rem"></div>
+                    `).join('')}
+                </div>
+            `
+        },
+
+        // Get skeleton type based on URL
+        getSkeletonType(url) {
+            if (url.includes('/transactions')) return 'transactions';
+            if (url.includes('/dashboard') && !url.includes('/profile') && !url.includes('/settings')) return 'dashboard';
+            return 'default';
+        },
+
+        // Show loading state
+        showLoading(targetUrl) {
+            this.pageLoader.classList.add('loading');
+            this.pageContent.classList.add('loading');
+
+            // Show skeleton
+            const skeletonType = this.getSkeletonType(targetUrl);
+            this.pageContent.innerHTML = this.skeletons[skeletonType];
+            this.pageContent.classList.remove('loading');
+        },
+
+        // Hide loading state
+        hideLoading() {
+            this.pageLoader.classList.remove('loading');
+            this.pageContent.classList.remove('loading');
+        },
+
+        // Update active navigation
+        updateActiveNav(url) {
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href) return; // Skip links without href
+                
+                const isActive = url.includes(href.split('/').pop());
+
+                link.classList.toggle('active', isActive);
+                link.classList.toggle('font-semibold', isActive);
+                link.classList.toggle('text-primary-600', isActive);
+            });
+        },
+
+        // Navigate to URL
+        async navigateTo(url, pushState = true) {
+            if (url === this.currentUrl) return;
+
+            try {
+                this.showLoading(url);
+
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const html = await response.text();
+
+                // Parse the response
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Get new page content
+                const newContent = doc.getElementById('page-content');
+                const newTitle = doc.querySelector('title');
+                const newPageTitle = doc.querySelector('header h1');
+
+                if (newContent) {
+                    // Update content with fade effect
+                    this.pageContent.style.opacity = '0';
+
+                    setTimeout(() => {
+                        this.pageContent.innerHTML = newContent.innerHTML;
+                        this.pageContent.style.opacity = '1';
+
+                        // Update title
+                        if (newTitle) document.title = newTitle.textContent;
+                        if (newPageTitle) {
+                            const headerTitle = document.querySelector('header h1');
+                            if (headerTitle) headerTitle.textContent = newPageTitle.textContent;
+                        }
+
+                        // Execute scripts in new content
+                        this.executeScripts(this.pageContent);
+
+                        this.hideLoading();
+                    }, 100);
+                }
+
+                // Update URL
+                if (pushState) {
+                    history.pushState({ url: url }, '', url);
+                }
+
+                this.currentUrl = url;
+                this.updateActiveNav(url);
+
+            } catch (error) {
+                console.error('Navigation error:', error);
+                // Fallback to regular navigation
+                window.location.href = url;
+            }
+        },
+
+        // Execute scripts in dynamically loaded content
+        executeScripts(container) {
+            const scripts = container.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                Array.from(oldScript.attributes).forEach(attr => {
+                    newScript.setAttribute(attr.name, attr.value);
+                });
+                newScript.textContent = oldScript.textContent;
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        },
+
+        // Initialize
+        init() {
+            // Intercept navigation link clicks
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a[href]');
+                if (!link) return;
+
+                const href = link.getAttribute('href');
+
+                // Only intercept internal dashboard links
+                if (href &&
+                    href.includes('/dashboard') &&
+                    !href.includes('/logout') &&
+                    !link.hasAttribute('target') &&
+                    !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+
+                    e.preventDefault();
+                    this.navigateTo(href);
+
+                    // Close mobile sidebar if open
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                        if (window.innerWidth < 1024) {
+                            toggleSidebar();
+                        }
+                    }
+                }
+            });
+
+            // Handle browser back/forward
+            window.addEventListener('popstate', (e) => {
+                if (e.state && e.state.url) {
+                    this.navigateTo(e.state.url, false);
+                } else {
+                    this.navigateTo(window.location.href, false);
+                }
+            });
+
+            // Set initial state
+            history.replaceState({ url: window.location.href }, '', window.location.href);
+        }
+    };
+
+    // Initialize page navigator
+    PageNavigator.init();
 </script>
 </body>
 

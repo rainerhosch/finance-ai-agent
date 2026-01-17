@@ -29,8 +29,9 @@ class Dashboard extends Auth_Controller
 
         $this->data['title'] = 'Dashboard - incatat.id';
         $this->data['page'] = 'dashboard';
-
-        $this->load->view('dashboard/index', $this->data);
+        $this->data['content_view'] = 'dashboard/index';
+        $this->data['user'] = $user;
+        $this->load->view('layout/template', $this->data);
     }
 
     /**
@@ -44,8 +45,9 @@ class Dashboard extends Auth_Controller
         $this->data['has_password'] = $this->User_model->has_password($user['id']);
         $this->data['title'] = 'Profil - incatat.id';
         $this->data['page'] = 'profile';
-
-        $this->load->view('dashboard/profile', $this->data);
+        $this->data['content_view'] = 'dashboard/profile';
+        $this->data['user'] = $user;
+        $this->load->view('layout/template', $this->data);
     }
 
     /**
@@ -92,7 +94,10 @@ class Dashboard extends Auth_Controller
     public function transactions()
     {
         $user = $this->get_user();
-
+        // echo '<pre>';
+        // var_dump($user);
+        // echo '</pre>';
+        // die;
         // Get filters from query string
         $filters = array(
             'type' => $this->input->get('type'),
@@ -108,8 +113,9 @@ class Dashboard extends Auth_Controller
         $this->data['filters'] = $filters;
         $this->data['title'] = 'Transaksi - incatat.id';
         $this->data['page'] = 'transactions';
-
-        $this->load->view('dashboard/transactions', $this->data);
+        $this->data['content_view'] = 'dashboard/transactions';
+        $this->data['user'] = $user;
+        $this->load->view('layout/template', $this->data);
     }
 
     /**
@@ -187,10 +193,10 @@ class Dashboard extends Auth_Controller
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode(array(
-                        'success' => true,
-                        'message' => 'Transaksi berhasil ditambahkan!',
-                        'id' => $transaction_id
-                    )));
+                'success' => true,
+                'message' => 'Transaksi berhasil ditambahkan!',
+                'id' => $transaction_id
+            )));
     }
 
     /**
@@ -214,8 +220,9 @@ class Dashboard extends Auth_Controller
 
         $this->data['title'] = 'Pengaturan - incatat.id';
         $this->data['page'] = 'settings';
-
-        $this->load->view('dashboard/settings', $this->data);
+        $this->data['content_view'] = 'dashboard/settings';
+        $this->data['user'] = $user;
+        $this->load->view('layout/template', $this->data);
     }
 
     /**

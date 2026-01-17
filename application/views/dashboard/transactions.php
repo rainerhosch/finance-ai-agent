@@ -1,5 +1,3 @@
-<?php $this->load->view('layout/dashboard_header'); ?>
-
 <!-- Filters -->
 <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-6">
     <form method="GET" class="flex flex-wrap gap-4 items-end">
@@ -153,5 +151,3 @@
         </div>
     <?php endif; ?>
 </div>
-
-<?php $this->load->view('layout/dashboard_footer'); ?>

@@ -1,5 +1,3 @@
-<?php $this->load->view('layout/dashboard_header'); ?>
-
 <div class="max-w-2xl mx-auto space-y-6">
     <?php if (isset($business) && $business && $user_detail->role === 'owner'): ?>
         <!-- Business Settings Section (Owner Only) -->
@@ -214,5 +212,3 @@
         }, 2000);
     }
 </script>
-
-<?php $this->load->view('layout/dashboard_footer'); ?>
