@@ -2,25 +2,6 @@
 
 <!-- Summary Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Balance -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <div class="flex items-center justify-between mb-4">
-            <span class="text-slate-500 text-sm">Saldo Bulan Ini</span>
-            <span class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center"><i
-                    class="fa-solid fa-wallet"></i></span>
-        </div>
-        <div class="text-2xl font-bold <?= $summary['balance'] >= 0 ? 'text-green-600' : 'text-red-600' ?>">
-            Rp
-            <?= number_format($summary['balance'], 0, ',', '.') ?>
-        </div>
-        <div class="text-sm text-slate-500 mt-1">
-            <?php
-            $diff = $summary['income'] > 0 ? round(($summary['balance'] / $summary['income']) * 100) : 0;
-            echo $diff >= 0 ? "Hemat {$diff}%" : "Over " . abs($diff) . "%";
-            ?>
-        </div>
-    </div>
-
     <!-- Income -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
         <div class="flex items-center justify-between mb-4">
@@ -50,6 +31,24 @@
         </div>
         <div class="text-sm text-slate-500 mt-1">
             <?= $summary['expense_count'] ?> transaksi
+        </div>
+    </div>
+    <!-- Balance -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-slate-500 text-sm">Saldo Keuangan Bulan Ini</span>
+            <span class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center"><i
+                    class="fa-solid fa-wallet"></i></span>
+        </div>
+        <div class="text-2xl font-bold <?= $summary['balance'] >= 0 ? 'text-green-600' : 'text-red-600' ?>">
+            Rp
+            <?= number_format($summary['balance'], 0, ',', '.') ?>
+        </div>
+        <div class="text-sm text-slate-500 mt-1">
+            <?php
+            $diff = $summary['income'] > 0 ? round(($summary['balance'] / $summary['income']) * 100) : 0;
+            echo $diff >= 0 ? "Sisa {$diff}% dari Pemasukan" : "Over " . abs($diff) . "% dari Pemasukan";
+            ?>
         </div>
     </div>
 
@@ -85,7 +84,7 @@
                 <?php foreach ($top_expenses as $expense): ?>
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">
-                            <?= $expense->icon ?: '📌' ?>
+                            <?= `<i class="{$expense->icon}"></i>` ?: '📌' ?>
                         </span>
                         <div class="flex-1">
                             <div class="font-medium text-slate-800">
