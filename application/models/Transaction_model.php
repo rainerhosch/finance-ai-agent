@@ -367,4 +367,163 @@ class Transaction_model extends CI_Model
 
         return $this->db->get()->result();
     }
+
+    /**
+     * Get balance (income - expense) by custom date range
+     * 
+     * @param int $user_id User ID
+     * @param string $date_from Start date (YYYY-MM-DD)
+     * @param string $date_to End date (YYYY-MM-DD)
+     * @param string $type Optional type filter (income/expense)
+     * @return array Balance data
+     */
+    public function get_balance_by_date_range($user_id, $date_from = null, $date_to = null, $type = null)
+    {
+        // Get user's business
+        $this->load->model('User_model');
+        $user = $this->User_model->find($user_id);
+
+        if (!$user || !$user->business_id) {
+            return array(
+                'income' => 0,
+                'expense' => 0,
+                'income_count' => 0,
+                'expense_count' => 0,
+                'balance' => 0
+            );
+        }
+
+        $this->db->select('type, SUM(total_amount) as total, COUNT(*) as count');
+        $this->db->from($this->table);
+        $this->db->where('business_id', $user->business_id);
+
+        // Apply date range filter
+        if ($date_from) {
+            $this->db->where('transaction_date >=', $date_from);
+        }
+        if ($date_to) {
+            $this->db->where('transaction_date <=', $date_to);
+        }
+
+        // Apply type filter if specified
+        if ($type) {
+            $this->db->where('type', $type);
+        }
+
+        $this->db->group_by('type');
+        $results = $this->db->get()->result();
+
+        $summary = array(
+            'income' => 0,
+            'expense' => 0,
+            'income_count' => 0,
+            'expense_count' => 0,
+            'balance' => 0
+        );
+
+        foreach ($results as $row) {
+            $summary[$row->type] = (float) $row->total;
+            $summary[$row->type . '_count'] = (int) $row->count;
+        }
+
+        $summary['balance'] = $summary['income'] - $summary['expense'];
+
+        return $summary;
+    }
+
+    /**
+     * Get transaction report with filters
+     * 
+     * @param int $user_id User ID
+     * @param array $filters Filters (date_from, date_to, type, category_id, limit, offset)
+     * @return array List of transactions
+     */
+    public function get_report($user_id, $filters = array())
+    {
+        // Get user's business
+        $this->load->model('User_model');
+        $user = $this->User_model->find($user_id);
+
+        if (!$user || !$user->business_id) {
+            return array();
+        }
+
+        $this->db->select('transactions.*, users.name as created_by_name');
+        $this->db->from($this->table);
+        $this->db->join('users', 'users.id = transactions.user_id', 'left');
+        $this->db->where('transactions.business_id', $user->business_id);
+
+        // Apply filters
+        if (!empty($filters['type'])) {
+            $this->db->where('transactions.type', $filters['type']);
+        }
+
+        if (!empty($filters['date_from'])) {
+            $this->db->where('transactions.transaction_date >=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $this->db->where('transactions.transaction_date <=', $filters['date_to']);
+        }
+
+        // Sorting
+        $this->db->order_by('transactions.transaction_date', 'DESC');
+        $this->db->order_by('transactions.id', 'DESC');
+
+        // Pagination
+        if (!empty($filters['limit'])) {
+            $offset = isset($filters['offset']) ? $filters['offset'] : 0;
+            $this->db->limit($filters['limit'], $offset);
+        }
+
+        $transactions = $this->db->get()->result();
+
+        // Add items and computed fields
+        foreach ($transactions as &$tx) {
+            $tx->amount = $tx->total_amount;
+            $tx->description = $tx->notes ?: $tx->store_name;
+
+            // Get items with category info
+            $tx->items = $this->db->select('transaction_items.*, categories.name as category_name, categories.icon as category_icon')
+                ->from('transaction_items')
+                ->join('categories', 'categories.id = transaction_items.category_id', 'left')
+                ->where('transaction_items.transaction_id', $tx->id)
+                ->order_by('transaction_items.id', 'ASC')
+                ->get()
+                ->result();
+
+            // Filter by category if specified
+            if (!empty($filters['category_id'])) {
+                $has_category = false;
+                foreach ($tx->items as $item) {
+                    if ($item->category_id == $filters['category_id']) {
+                        $has_category = true;
+                        break;
+                    }
+                }
+                if (!$has_category) {
+                    $tx = null; // Mark for removal
+                }
+            }
+
+            // Get first item's category for display
+            if ($tx && count($tx->items) > 0) {
+                $tx->category_name = $tx->items[0]->category_name;
+                $tx->category_icon = $tx->items[0]->category_icon;
+                if (!$tx->description) {
+                    $tx->description = $tx->items[0]->name;
+                }
+            } else if ($tx) {
+                $tx->category_name = null;
+                $tx->category_icon = null;
+            }
+        }
+
+        // Remove null entries (filtered out by category)
+        $transactions = array_values(array_filter($transactions, function ($tx) {
+            return $tx !== null;
+        }));
+
+        return $transactions;
+    }
 }

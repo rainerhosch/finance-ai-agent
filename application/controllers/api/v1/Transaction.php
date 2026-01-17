@@ -218,4 +218,139 @@ class Transaction extends API_Controller
             'message' => 'Transaksi berhasil dihapus'
         ));
     }
+
+    /**
+     * Get balance (income - expense)
+     * GET /api/v1/transaction/balance
+     * 
+     * Query params:
+     * - period: 'month' | 'year' (optional, default: month)
+     * - from: date string YYYY-MM-DD (optional, for custom range)
+     * - to: date string YYYY-MM-DD (optional, for custom range)
+     */
+    public function balance()
+    {
+        if (!$this->authenticate()) {
+            return;
+        }
+
+        $period = $this->input->get('period');
+        $date_from = $this->input->get('from');
+        $date_to = $this->input->get('to');
+
+        // If custom date range is provided, use that instead of period
+        if ($date_from || $date_to) {
+            $balance_data = $this->Transaction_model->get_balance_by_date_range(
+                $this->user->id,
+                $date_from,
+                $date_to
+            );
+            $period_info = array(
+                'type' => 'custom',
+                'from' => $date_from,
+                'to' => $date_to
+            );
+        } else {
+            // Default to month if no period specified
+            $period = $period ?: 'month';
+            $balance_data = $this->Transaction_model->get_summary($this->user->id, $period);
+            $period_info = array(
+                'type' => $period
+            );
+        }
+
+        $this->json_response(array(
+            'success' => true,
+            'period' => $period_info,
+            'data' => array(
+                'total_income' => $balance_data['income'],
+                'total_expense' => $balance_data['expense'],
+                'balance' => $balance_data['balance'],
+                'income_count' => $balance_data['income_count'],
+                'expense_count' => $balance_data['expense_count']
+            )
+        ));
+    }
+
+    /**
+     * Get transaction report
+     * GET /api/v1/transaction/report
+     * 
+     * Query params:
+     * - from: date string YYYY-MM-DD (required)
+     * - to: date string YYYY-MM-DD (required)
+     * - type: 'income' | 'expense' (optional, default: all)
+     * - category_id: int (optional, filter by category)
+     * - limit: int (optional, default: 50)
+     * - offset: int (optional, default: 0)
+     */
+    public function report()
+    {
+        if (!$this->authenticate()) {
+            return;
+        }
+
+        $date_from = $this->input->get('from');
+        $date_to = $this->input->get('to');
+        $type = $this->input->get('type');
+        $category_id = $this->input->get('category_id');
+        $limit = $this->input->get('limit') ?: 50;
+        $offset = $this->input->get('offset') ?: 0;
+
+        // Validate date range
+        if (empty($date_from) || empty($date_to)) {
+            $this->json_response(array('error' => 'Rentang waktu (from dan to) diperlukan'), 400);
+            return;
+        }
+
+        // Validate type if provided
+        if (!empty($type) && !in_array($type, array('income', 'expense'))) {
+            $this->json_response(array('error' => 'Tipe transaksi tidak valid (income/expense)'), 400);
+            return;
+        }
+
+        $filters = array(
+            'date_from' => $date_from,
+            'date_to' => $date_to,
+            'type' => $type,
+            'category_id' => $category_id,
+            'limit' => $limit,
+            'offset' => $offset
+        );
+
+        // Get transactions
+        $transactions = $this->Transaction_model->get_report($this->user->id, $filters);
+
+        // Get summary for the same period
+        $summary = $this->Transaction_model->get_balance_by_date_range(
+            $this->user->id,
+            $date_from,
+            $date_to,
+            $type
+        );
+
+        $this->json_response(array(
+            'success' => true,
+            'period' => array(
+                'from' => $date_from,
+                'to' => $date_to
+            ),
+            'filter' => array(
+                'type' => $type ?: 'all',
+                'category_id' => $category_id
+            ),
+            'summary' => array(
+                'total_income' => $summary['income'],
+                'total_expense' => $summary['expense'],
+                'balance' => $summary['balance'],
+                'transaction_count' => $summary['income_count'] + $summary['expense_count']
+            ),
+            'data' => $transactions,
+            'pagination' => array(
+                'limit' => (int) $limit,
+                'offset' => (int) $offset,
+                'count' => count($transactions)
+            )
+        ));
+    }
 }
