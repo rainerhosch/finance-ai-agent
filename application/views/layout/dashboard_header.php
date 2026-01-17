@@ -72,8 +72,13 @@
         }
 
         @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
         }
 
         .skeleton-text {
@@ -255,4 +260,4 @@
             </header>
 
             <!-- Page Content -->
-            <div class="p-4 lg:p-8">
+            <div class="p-2 md:p-4 lg:p-8">
