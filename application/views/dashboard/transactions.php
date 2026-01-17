@@ -19,7 +19,7 @@
                 <option value="">Semua</option>
                 <?php foreach ($categories as $cat): ?>
                     <option value="<?= $cat->id ?>" <?= ($filters['category_id'] ?? '') == $cat->id ? 'selected' : '' ?>>
-                        <?= $cat->icon ?>
+                        <i class="<?= $cat->icon ?>"></i>
                         <?= $cat->name ?>
                     </option>
                 <?php endforeach; ?>
